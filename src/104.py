@@ -9,7 +9,6 @@ Created on Fri Dec  7 10:04:14 2018
 pip install --index-url=http://pypi.python.org/simple/ --trusted-host pypi.python.org 
 '''
 
-
 import os
 import pandas as pd
 from pandas import ExcelWriter

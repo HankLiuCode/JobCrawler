@@ -1,3 +1,4 @@
+import numpy
 import pandas
 import os
 
@@ -38,7 +39,7 @@ class Parser104:
     def parse104Dataframe(self,df):
         for i in df.index:
             df.at[i,'view_count'] = self.getAppliedNumber(df.at[i,'view_count'])
-            df.at[i,'address'] = self.getWorkingArea(df.at[i,'address'])
+            df.at[i,'addr'] = self.getWorkingArea(df.at[i,'addr'])
             df.at[i,'salary'] = self.getSalary(df.at[i,'salary'])
             df.at[i,'required'] = self.getRequiredEmp(df.at[i,'required'])
             df.at[i,'education'] = self.getRequiredDegree(df.at[i,'education'])
