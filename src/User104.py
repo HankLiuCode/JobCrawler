@@ -49,17 +49,20 @@ class User104:
     
     def get_area_dict(self):
         area_dict = {
+            "":"",
             "台北市" : "6001001000", "新北市" : "2C6001002000" , "桃園市" : "6001005000"
         }
         return area_dict
     def get_jobcat_dict(self):
         jobcat_dict = {
+            "":"",
             "資訊軟體系統類" : "2007000000", "軟體／工程類人員" : "2007001000" , "MIS程式設計師" : "2007002000" ,
-            "金融專業相關類人員" : "2003002000"
+            "金融專業相關類人員" : "2003002000", "國外業務人員":"2005003005"
         }
         return jobcat_dict
     def get_indcat_dict(self):
         indcat_dict = {
+            "":"",
             "金融投顧及保險業" : "1004000000", "投資理財相關業" : "1004002000" , "金融機構及其相關業" : "1004001000" 
         }
         return indcat_dict
@@ -96,11 +99,10 @@ class User104:
         return self.url
     
     def get_filename(self,name):
-        filename = "jobs104_"+str(datetime.datetime.now().date())+"_" + name + ".xlsx"
+        filename = "jobs104_"+str(datetime.datetime.now().date()).replace("-","")+"_" + name + ".xlsx"
         return filename
 
 if __name__ == "__main__":
-
     keywordList = ["新光","銀行"]
     areaTestList = ["台北市"]
     jobcatTestList = ["資訊軟體系統類"]

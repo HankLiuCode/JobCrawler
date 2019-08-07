@@ -4,21 +4,26 @@ import os
 
 class Parser104:
     
-    def __init__(self):
-        self.appliedNumberDict = {}
-        self.workingAreaDict = {}
+    def __init__(self,configPath,appliedNumberSheet,workingAreaSheet):
+        self.appliedNumberDict = self.getAppliedNumberDict(configPath,appliedNumberSheet)
+        self.workingAreaDict = self.getWorkingAreaDict(configPath,workingAreaSheet)
         
-    def setAppliedNumberDict(self,filepath,sheet):
+    def getAppliedNumberDict(self,filepath,sheet):
+        appliedNumberDict = {}
         dfAppliedNumber = pandas.read_excel(filepath, sheet)
-        for index, row in dfAppliedNumber.iterrows():
-            self.appliedNumberDict[row[0]] = row[1]
-        print(self.appliedNumberDict)
+        for index,row in dfAppliedNumber.iterrows():
+            appliedNumberDict[row[0]] = row[1]
+        #print(appliedNumberDict)
+        return appliedNumberDict
+        
     
-    def setWorkingAreaDict(self,filepath,sheet):
+    def getWorkingAreaDict(self,filepath,sheet):
+        workingAreaDict = {}
         dfWorkingArea = pandas.read_excel(filepath,sheet)
-        for index, row in dfWorkingArea.iterrows():
-            self.workingAreaDict[row[0]] = row[1]
-        print(self.workingAreaDict)
+        for index,row in dfWorkingArea.iterrows():
+            workingAreaDict[row[0]] = row[1]
+        #print(workingAreaDict)
+        return workingAreaDict
             
     def parse104Excel(self,filepath,sheet):
         df = pandas.read_excel(io=filepath,sheet_name=sheet)
@@ -56,7 +61,7 @@ class Parser104:
     def getAppliedNumber(self,appliedNumberStr):
         return self.appliedNumberDict.get(appliedNumberStr)
 
-
+    #bug!
     def getWorkingArea(self,workingStr):
         retVal = ""
         for key in self.workingAreaDict:
@@ -64,10 +69,11 @@ class Parser104:
                 retVal = self.workingAreaDict[key]
         return retVal     
 
-
+    
     #抓薪水
     # input  = "月薪 28,000~40,000元"
     # output = 28000
+    #bug!
     def getSalary(self,salaryStr):
         baseSalary = 0
         try:
@@ -136,11 +142,11 @@ class Parser104:
         
 
 if __name__ == '__main__':
-    filepath = '../Data/jobs104_20190624_5846.xlsx'
+    filepath = '../Data/jobs104_20190807_myfile.xlsx'
     sheet = "Sheet1"
-    parser104 = Parser104()
     
-    parser104.setAppliedNumberDict('../conf/104_config.xlsx', '目前應徵人數')
-    parser104.setWorkingAreaDict('../conf/104_config.xlsx', '上班地點')
+    configPath = '../conf/104_config.xlsx'
+    appliedNumberSheet= '目前應徵人數'
+    workingAreaSheet = '上班地點'
+    parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
     
-    parser104.parse104Excel(filepath,sheet)

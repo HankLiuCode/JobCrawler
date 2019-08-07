@@ -232,8 +232,7 @@ def start_crawl( url ):
             job_detail = get_job_detail( jobno )
             job_data.update( job_detail )
             all_jobs.append( job_data )
-            time.sleep( random.uniform( 1.0, 2.0 ) )
-
+            time.sleep( random.uniform( 0.3, 0.5 ))
             # for test only
     #         break
 
@@ -245,16 +244,25 @@ def start_crawl( url ):
     return all_jobs
 
 if __name__ == "__main__":
-    keywordList = ["新光","銀行"]
+    #area
+    #台北市，新北市....
+    #jobcat
+    #資訊軟體系統類 ( 軟體／工程類人員 , MIS程式設計師 ),  金融專業相關類人員
+    #indcat
+    #
+    keywordList = [""]
     areaTestList = ["台北市"]
-    jobcatTestList = ["資訊軟體系統類"]
-    indcatTestlist = ["金融投顧及保險業"]
+    jobcatTestList = ["國外業務人員"]
+    indcatTestlist = [""]
     u = User104(keywordList,areaTestList,jobcatTestList,indcatTestlist)
-    parser104 = Parser104()
-    
     all_jobs = start_crawl(u.get_url())
     jobs_df = pandas.DataFrame(all_jobs)
-    parsed_jobs_df = parser104.parse104Dataframe(jobs_df)
+
+    configPath = '../conf/104_config.xlsx'
+    appliedNumberSheet= '目前應徵人數'
+    workingAreaSheet = '上班地點'
+    parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
+    parser104.parse104Dataframe(jobs_df)
 
     column_dict = {
         'jobno':'Job ID', 'update':'更新日期','jobname':'工作名稱', 'company':'公司','view_count':'目前應徵人數',
@@ -267,7 +275,7 @@ if __name__ == "__main__":
     }
     columns = [k for k in column_dict]
     columns_chinese = [column_dict[k] for k in column_dict]
-    
-    jobs_df.to_excel(u.get_filename("myfile"), index=False ,columns = columns)
+    filename = "../Data/" + u.get_filename("myfile")
+    jobs_df.to_excel(filename, index=False ,columns = columns)
     print('Finish!!')
     
