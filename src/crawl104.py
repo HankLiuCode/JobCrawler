@@ -250,17 +250,20 @@ if __name__ == "__main__":
     #資訊軟體系統類 ( 軟體／工程類人員 , MIS程式設計師 ),  金融專業相關類人員
     #indcat
     #
-    keywordList = [""]
+    keywordList = ["新光銀行"]
+    roList = ["兼職"]
     areaTestList = ["台北市"]
-    jobcatTestList = ["國外業務人員"]
+    jobcatTestList = [""]
     indcatTestlist = [""]
-    u = User104(keywordList,areaTestList,jobcatTestList,indcatTestlist)
-    all_jobs = start_crawl(u.get_url())
-    jobs_df = pandas.DataFrame(all_jobs)
-
     configPath = '../conf/104_config.xlsx'
     appliedNumberSheet= '目前應徵人數'
     workingAreaSheet = '上班地點'
+    
+    u = User104(keywordList,roList,areaTestList,jobcatTestList,indcatTestlist)
+    all_jobs = start_crawl(u.get_url())
+    print(u.get_url())
+    jobs_df = pandas.DataFrame(all_jobs)
+
     parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
     parser104.parse104Dataframe(jobs_df)
 
@@ -274,8 +277,9 @@ if __name__ == "__main__":
         'job_content':'工作內容','url':'網址'
     }
     columns = [k for k in column_dict]
-    columns_chinese = [column_dict[k] for k in column_dict]
+    #columns_chinese = [column_dict[k] for k in column_dict]
     filename = "../Data/" + u.get_filename("myfile")
+    print(jobs_df)
     jobs_df.to_excel(filename, index=False ,columns = columns)
     print('Finish!!')
     

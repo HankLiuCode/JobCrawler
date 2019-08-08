@@ -36,17 +36,25 @@ class User104:
         # keyword
         # 額外關鍵字搜尋
         #   
-    def __init__(self,keywordList,areaList,jobcatList,indcatList):
+    def __init__(self,keywordList,singleRoList,areaList,jobcatList,indcatList):
+        self.roDict = self.get_ro_dict()
         self.areaDict = self.get_area_dict()
         self.jobcatDict = self.get_jobcat_dict()
         self.indcatDict = self.get_indcat_dict()
+        
         self.url= self.generate_url(
                 keywordList,
+                [self.roDict[ro] for ro in singleRoList],   
                 [self.areaDict[area] for area in areaList],
                 [self.jobcatDict[jobcat] for jobcat in jobcatList],
                 [self.indcatDict[indcat] for indcat in indcatList],
             )
-    
+    def get_ro_dict(self):
+        ro_dict = {
+            "":"",
+            "全部":"0","全職":"1","兼職":"2"
+        }
+        return ro_dict
     def get_area_dict(self):
         area_dict = {
             "":"",
@@ -67,6 +75,7 @@ class User104:
         }
         return indcat_dict
     
+    
     def get_test_url(self):
         url = u.generate_url( 
             keywordList=["新光銀行","行銷"],
@@ -76,13 +85,15 @@ class User104:
         )
         return url
 
-    def generate_url(self,keywordList,areaList,jobcatList,indcatList):
-        fullurl = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&ro=1&page={}'
+    def generate_url(self,keywordList,singleRoList,areaList,jobcatList,indcatList):
+        fullurl = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}'
+        fullurl +=self.generate_url_segment("ro",singleRoList,False)
         fullurl += self.generate_url_segment("keyword",keywordList,False)
         fullurl += self.generate_url_segment("area",areaList,False)
         fullurl += self.generate_url_segment("jobcat",jobcatList,False)
         fullurl += self.generate_url_segment("indcat",indcatList,False)
         return fullurl
+
     def generate_url_segment(self,parameterName,parameterList,isFirstParameter):
         url_segment = ""
         if(not isFirstParameter):
@@ -103,13 +114,14 @@ class User104:
         return filename
 
 if __name__ == "__main__":
+    singleRoList = ['兼職']
     keywordList = ["新光","銀行"]
     areaTestList = ["台北市"]
     jobcatTestList = ["資訊軟體系統類"]
     indcatTestlist = ["金融投顧及保險業"]
-    u = User104(keywordList,areaTestList,jobcatTestList,indcatTestlist)
-    
+    u = User104(keywordList,singleRoList,areaTestList,jobcatTestList,indcatTestlist)
+
     #print(u.get_filename("myfile"))
-    #print(u.get_url())
+    print(u.get_url())
     #print(u.generate_url(keywordList=["keyword1","keyword2"],areaList=["aaaaaaaa","baaaaaaaaaa"],jobcatList=["jjjjjjjjjjjj","JJJJJJJJJJJ"],indcatList=["iiiiiiiiiiiiii","iiiiiiiiiiii"]))
     #print(u.generate_url_segment("area",["aaaaaaaa","bbbbbbbb","cccccccc"],True))

@@ -119,7 +119,7 @@ for i in range(0,len(df.index)): #len(df.index)
     #print(df.iloc[i]['other_info'])
     
     record = df.iloc[i]['other_info']
-    record = record.upper();
+    record = record.upper()
     record = replaceData(record)
     str_record = str(record)
     cut_data = getJiebaResult(str_record)
@@ -141,7 +141,6 @@ for i in range(0,len(df.index)): #len(df.index)
 
 # word count
 Counter(word_list).most_common()
-# Initializing Dictionary
 d = {}
 
 # counting number of times each word comes up in list of words (in dictionary)
