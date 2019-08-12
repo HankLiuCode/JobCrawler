@@ -142,11 +142,11 @@ class Parser104:
         
 
 if __name__ == '__main__':
-    filepath = '../Data/jobs104_20190807_myfile.xlsx'
+    filepath = '../Data/jobs104_20190808_myfile.xlsx'
     sheet = "Sheet1"
-    
     configPath = '../conf/104_config.xlsx'
-    appliedNumberSheet= '目前應徵人數'
     workingAreaSheet = '上班地點'
+    appliedNumberSheet= '目前應徵人數'
     parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
+    parser104.parse104Excel(filepath,sheet)
     

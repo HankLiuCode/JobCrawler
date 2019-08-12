@@ -10,7 +10,7 @@ class User104:
         # asc:       1(ascending=true), 0(ascending=false)
         # mode:      s(摘要),l(列表)
         # page:      <int>(第幾頁)
-        # jobsource: ??? (打甚麼好像沒差)
+        # jobsource: 
         # example: 'https://www.104.com.tw/jobs/search/?ro=1&order=11&asc=0&mode=s&jobsource=indexpoc2018&page=1
 
         #### 額外參數 ####
@@ -19,23 +19,12 @@ class User104:
         #              url = url + &area=6001001000%2C6001002000
         #              url = url + '&indcat=1004000000'
         #              url = url + &keyword=國泰人壽
-        #
         # ro 工作型態        
-        #      0(全部),1(全職),2(兼職),3(高階),4(派遣),5(接案),6(家教)
-        #
         # jobcat 職務類別
-        #     2007000000(資訊軟體系統類) { 2007001000(軟體／工程類人員), 2007002000(MIS程式設計師) }
-        #     2003002000(金融專業相關類人員)
-        #
         # area 地區
-        #     6001001000(台北市), 2C6001002000(新北市), 6001005000(桃園市)
-        #
         # indcat 公司產業
-        #     1004000000(金融投顧及保險業) { 1004002000(投資理財相關業), 1004001000(金融機構及其相關業) }
-        # 
-        # keyword
-        # 額外關鍵字搜尋
-        #   
+        # keyword 額外關鍵字搜尋
+
     def __init__(self,keywordList,singleRoList,areaList,jobcatList,indcatList):
         self.roDict = self.get_ro_dict()
         self.areaDict = self.get_area_dict()
@@ -52,7 +41,7 @@ class User104:
     def get_ro_dict(self):
         ro_dict = {
             "":"",
-            "全部":"0","全職":"1","兼職":"2"
+            "全部":"0","全職":"1","兼職":"2","高階":"3","派遣":4,"接案":5,"家教":6
         }
         return ro_dict
     def get_area_dict(self):
@@ -65,7 +54,8 @@ class User104:
         jobcat_dict = {
             "":"",
             "資訊軟體系統類" : "2007000000", "軟體／工程類人員" : "2007001000" , "MIS程式設計師" : "2007002000" ,
-            "金融專業相關類人員" : "2003002000", "國外業務人員":"2005003005"
+            "金融專業相關類人員" : "2003002000", 
+            "國外業務人員":"2005003005",
         }
         return jobcat_dict
     def get_indcat_dict(self):
@@ -77,7 +67,7 @@ class User104:
     
     
     def get_test_url(self):
-        url = u.generate_url( 
+        url = self.generate_url( 
             keywordList=["新光銀行","行銷"],
             areaList=["6001001000","2C6001002000"],
             jobcatList=["2007000000","2003002000"],

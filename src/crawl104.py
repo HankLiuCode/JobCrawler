@@ -30,16 +30,6 @@ def clean_blank_lines( text ) :
 def clean_text( text ) :
     return text.replace('\t','').replace('\r','').replace('\n','')
 
-def merge_list( dom, sep_char ) :
-    result = ''
-    for dt in dom :
-        text = dt.text.strip()
-        if text != '' :
-            if result != '' :
-                result += sep_char
-            result += dt.text
-    return result
-
 def parse_job_content( meta_list ) :
     result = ''
     for meta in meta_list :
@@ -55,13 +45,6 @@ def get_job_detail( jobno ) :
     url = 'https://www.104.com.tw/job/{}'
     res = retryRequest.get( url.format( jobno ),headers=header_info, timeout=5,verify=False )
     soup = BeautifulSoup( res.text, 'html.parser')
-
-#     html_src = res.text
-#     info_list = soup.select('.info')
-#     print( html_src )
-#     print( html_src[html_src.index('<h2>公司福利</h2>'):html_src.index('<h2>聯絡方式</h2>')] )
-#     print( re.search( r'<h2>公司福利</h2>(.*)<h2>聯絡方式</h2>', html_src, re.S ).group( 1 ) )
-#     print( soup.select('.info')[2] )
 
     view_count=''
     job_content=''
@@ -233,14 +216,7 @@ def start_crawl( url ):
             job_data.update( job_detail )
             all_jobs.append( job_data )
             time.sleep( random.uniform( 0.3, 0.5 ))
-            # for test only
-    #         break
-
         curr_page = curr_page + 1
-
-        # for test only
-    #     if( curr_page > 2 ) :
-    #         break
     return all_jobs
 
 if __name__ == "__main__":
@@ -250,18 +226,18 @@ if __name__ == "__main__":
     #資訊軟體系統類 ( 軟體／工程類人員 , MIS程式設計師 ),  金融專業相關類人員
     #indcat
     #
-    keywordList = ["新光銀行"]
-    roList = ["兼職"]
-    areaTestList = ["台北市"]
-    jobcatTestList = [""]
+    keywordList = ["精算"]
+    roList = ["全職"]
+    areaTestList = [""]
+    jobcatTestList = ["資訊軟體系統類"]
     indcatTestlist = [""]
     configPath = '../conf/104_config.xlsx'
     appliedNumberSheet= '目前應徵人數'
     workingAreaSheet = '上班地點'
+    filename = keywordList[0]
     
     u = User104(keywordList,roList,areaTestList,jobcatTestList,indcatTestlist)
     all_jobs = start_crawl(u.get_url())
-    print(u.get_url())
     jobs_df = pandas.DataFrame(all_jobs)
 
     parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
@@ -278,7 +254,7 @@ if __name__ == "__main__":
     }
     columns = [k for k in column_dict]
     #columns_chinese = [column_dict[k] for k in column_dict]
-    filename = "../Data/" + u.get_filename("myfile")
+    filename = "../Data/" + u.get_filename(filename)
     print(jobs_df)
     jobs_df.to_excel(filename, index=False ,columns = columns)
     print('Finish!!')
