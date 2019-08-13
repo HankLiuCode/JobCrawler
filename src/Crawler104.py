@@ -4,18 +4,20 @@ import requests
 from requests.adapters import HTTPAdapter
 import time
 import pandas
+from Crawler104Modules import User104,Parser104
 
 class Crawler104:
-    def __init__(self):
+    def __init__(self,rootURL):
         self.header_info = {
             'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
             'Accept-Language':'zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4',
             'Connection':'close'
         }
+        self.rootURL = rootURL
         self.processedJob = []
         
     # if the element chosen has children
-    def getElementsText(self,elements):
+    def __getElementsText(self,elements):
         seperate_char = "、"
         result = ''
         for element in elements :
@@ -26,117 +28,112 @@ class Crawler104:
                 result += text
         return result
 
-    def cleanText(self,text):
+    def __cleanText(self,text):
         #replace blank lines
         text = text.replace('\n','').replace('\t','').replace('\r','')
         #replace unwanted chars
         text = text.replace(' ','').replace('：','')
         return text
+
+    def __getJobNo(self,link):
+        jobno = re.search( r'job/(.*)\?jobsource', link ).group(1)
+        return jobno
+
+    def __isProcessed(self,jobno):
+        if jobno in self.processedJob:
+            print("{} is proccesed".format(jobno))
+            return True
+        return False
     
-    def getRawJobDetail(self,jobno):
+    def __getTotalPage(self):
+        res = requests.get( self.rootURL.format(1),headers=self.header_info, timeout=10)
+        soup = BeautifulSoup(res.text,'html.parser')
+        totalPage = int( re.search( r'\"totalPage\":(\d*)', soup.text).group(1))
+        return totalPage
+
+    def __getTotalCount(self):
+        res = requests.get( self.rootURL.format(1),headers=self.header_info, timeout=10)
+        soup = BeautifulSoup(res.text,'html.parser')
+        totalCount = int( re.search( r'\"totalCount\":(\d*)', soup.text).group(1))
+        return totalCount
+
+    def getJobDetail(self,jobno):
         url = 'https://www.104.com.tw/job/{}'
         res = requests.get( url.format( jobno ),headers=self.header_info, timeout=5)
         soup = BeautifulSoup( res.text, 'html.parser')
-        #the dict that will be returned
-        rawJobDetailDict={}
+        #dict that has chinese as key
+        jobDetailDict={}
 
         #get view count and job content
-        view_count = self.cleanText(soup.select_one('.sub a').text).replace("應徵","")
-        job_content = self.cleanText(soup.select_one('.content p').text )
-        rawJobDetailDict['應徵人數'] = view_count
-        rawJobDetailDict['工作內容'] = job_content
+        appliedNumber = self.__cleanText(soup.select_one('.sub a').text).replace("應徵","")
+        jobContent = self.__cleanText(soup.select_one('.content p').text)
+        jobDetailDict['應徵人數'] = appliedNumber
+        jobDetailDict['工作內容'] = jobContent
 
-        #gets all the columns for jobdetail
+        #gets all other columns for jobdetail
         content_keys = soup.select(".content dt")
         content_vals = soup.select('.content dd')
         index = -1
         for key in content_keys:
             index += 1
-            rawJobDetailDict[self.cleanText(key.text)] = self.cleanText(content_vals[index].text)
+            jobDetailDict[self.__cleanText(key.text)] = self.__cleanText(content_vals[index].text)
         
-        #print(rawJobDetailDict)
-        return rawJobDetailDict
-    
-        def getJobDetail(rawJobDetailDict):
-            chineseToEnglishDict = {
-                '職務類別':'JobCategory',
-                '工作待遇':'Salary',
-                '工作性質':'nature',
-                '上班地點':'WorkingAddress',
-                '管理責任':'Manage',
-                '出差外派':'Travel',
-                '上班時段':'working',
-                '休假制度':'vacation',
-                '可上班日':'available',
-                '需求人數':'required',
-                '接受身分':'identity',
-                '工作經歷':'experience',
-                '學歷要求':'education',
-                '科系要求':'department',
-                '語文條件':'language',
-                '擅長工具':'tool',
-                '工作技能':'skill',
-                '其他條件':'other',
-                '聯絡人':'Contact',
-                '工作編號':'jobno',
-                '工作名稱':'jobname', 
-                '公司':'company', 
-                '工作連結':'joblink'
-            }
+        #print(jobDetailDict)
+        return jobDetailDict
 
-    def crawlerStart(self):
-        url = "https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}&keyword=新光銀行行銷"
-        totalPage = 2
+    def getAllJobs(self):
+        totalPage = self.__getTotalPage()
+        totalCount = self.__getTotalCount()
         currentPage = 1
+        currentCount = 1
+        jobItems = []
         jobList = []
-        all_jobs = []
 
-        while(currentPage < totalPage):
+        while(currentPage <= totalPage):
             retryRequest = requests.Session()
             retryRequest.mount( 'https://', HTTPAdapter( max_retries = 5 ) )
-            res = retryRequest.get( url.format( currentPage ),headers=self.header_info, timeout=5,verify=False)
+            res = retryRequest.get( self.rootURL.format( currentPage ),headers=self.header_info, timeout=5)
             soup = BeautifulSoup(res.text,'html.parser')
-            if currentPage == 1 :
-                totalPage = int( re.search( r'\"totalPage\":(\d*)', soup.text).group(1))
-            print( '[{}/{}]'.format(currentPage,totalPage))
-
-            jobList = soup.select('.js-job-item')
-            for job in jobList:
+            print( 'Page: [{}/{}]'.format(currentPage,totalPage))
+            
+            jobItems = soup.select('.js-job-item')
+            for job in jobItems:
                 jobname = job.select_one('.js-job-link').text
                 joblink = job.select_one('.js-job-link')['href']
                 joblink = 'https:' + joblink
-                print(joblink)
-                jobno = self.getJobNo(joblink)
-                if(not self.isProcessed(jobno)):
-                    self.processedJob.append(jobno)
+                print( '[{}/{}] {}'.format(currentCount,totalCount,joblink))
                 
+                jobno = self.__getJobNo(joblink)
+                self.processedJob.append(jobno)
+            
                 company = job.select_one('.b-list-inline a').text
-                company = self.cleanText(company)
+                company = self.__cleanText(company)
                 
-                jobDetail = self.getRawJobDetail(jobno)
+                jobDetail = self.getJobDetail(jobno)
                 moreJobDetail = { '工作編號':jobno, '工作名稱':jobname, '公司':company, '工作連結':joblink}
                 jobDetail.update(moreJobDetail)
-                all_jobs.append(jobDetail)
+                jobList.append(jobDetail)
+                currentCount += 1 
                 time.sleep(0.2)
             currentPage += 1
-        return all_jobs
-
-    def getJobNo(self,link):
-        jobno = re.search( r'job/(.*)\?jobsource', link ).group(1)
-        return jobno
-
-    def isProcessed(self,jobno):
-        if jobno in self.processedJob:
-            print("{} is proccesed".format(jobno))
-            return True
-        return False
+        return jobList
 
 if __name__ == "__main__":
-    url = "https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}"
-    jobno="4pkh7"
-    c = Crawler104()
-    print(c.getRawJobDetail(jobno))
-    #all_jobs = c.crawlerStart()
-    #df = pandas.DataFrame(all_jobs)
-    #df.to_excel('test.xlsx')
+    singleRoTestList = ['全部']
+    keywordTestList = ["新光","銀行"]
+    areaTestList = ["台北市"]
+    jobcatTestList = ["資訊軟體系統類"]
+    indcatTestList = ["金融投顧及保險業"]
+    user = User104(
+        keywordList=keywordTestList,
+        singleRoList=singleRoTestList,
+        areaList=areaTestList,
+        jobcatList=jobcatTestList,
+        indcatList=indcatTestList)
+    query = user.get_query()
+    c = Crawler104(query)
+    allJobs = c.getAllJobs()
+    df = pandas.DataFrame(allJobs)
+    df.to_excel('test2.xlsx')
+    print(len(c.processedJob)==len(set(c.processedJob)))
     print('Finish')
