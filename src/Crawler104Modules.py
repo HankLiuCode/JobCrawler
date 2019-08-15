@@ -5,20 +5,14 @@ import datetime
 
 class Parser104:
     
-    def __init__(self,configPath,appliedNumberSheet,workingAreaSheet):
+    def __init__ (self,configPath,appliedNumberSheet,workingAreaSheet):
         self.appliedNumberDict = self.__getAppliedNumberDict(configPath,appliedNumberSheet)
         self.workingAreaDict = self.__getWorkingAreaDict(configPath,workingAreaSheet)
-            
-    def parse104Excel(self,filepath,sheet):
+    
+
+    def parse104Excel(self,filepath,sheet="Sheet1"):
         df = pandas.read_excel(io=filepath,sheet_name=sheet)
-        for i in df.index:
-            df.at[i,'應徵人數'] = self.__getAppliedNumber(df.at[i,'應徵人數'])
-            df.at[i,'上班地點'] = self.__getWorkingArea(df.at[i,'上班地點'])
-            df.at[i,'工作待遇'] = self.__getSalary(df.at[i,'工作待遇'])
-            df.at[i,'需求人數'] = self.__getRequiredEmp(df.at[i,'需求人數'])
-            df.at[i,'學歷要求'] = self.__getRequiredDegree(df.at[i,'學歷要求'])
-            df.at[i,'語文條件'] = self.__getLanguageData(df.at[i,'語文條件'])
-            
+        self.parse104Dataframe(df)
         dirname = os.path.dirname(filepath)
         filename = os.path.splitext(filepath)[0] + "_parsed.xlsx"
         df.to_excel(os.path.join(dirname,filename))
@@ -27,18 +21,12 @@ class Parser104:
 
     def parse104Dataframe(self,df):
         for i in df.index:
-            df.at[i,'appliedNumber'] = self.__getAppliedNumber(df.at[i,'view_count'])
-            df.at[i,'addr'] = self.__getWorkingArea(df.at[i,'addr'])
-            df.at[i,'salary'] = self.__getSalary(df.at[i,'salary'])
-            df.at[i,'required'] = self.__getRequiredEmp(df.at[i,'required'])
-            df.at[i,'education'] = self.__getRequiredDegree(df.at[i,'education'])
-            df.at[i,'language'] = self.__getLanguageData(df.at[i,'language'])
-            #print(df.at[i,'view_count'])
-            #print(df.at[i,'address'])
-            #print(df.at[i,'salary'])
-            #print(df.at[i,'required'])
-            #print(df.at[i,'education'])
-            #print(df.at[i,'language'])
+            df.at[i,'應徵人數'] = self.__getAppliedNumber(df.at[i,'應徵人數'])
+            df.at[i,'上班地點'] = self.__getWorkingArea(df.at[i,'上班地點'])
+            df.at[i,'工作待遇'] = self.__getSalary(df.at[i,'工作待遇'])
+            df.at[i,'需求人數'] = self.__getRequiredEmp(df.at[i,'需求人數'])
+            df.at[i,'學歷要求'] = self.__getRequiredDegree(df.at[i,'學歷要求'])
+            df.at[i,'語文條件'] = self.__getLanguageData(df.at[i,'語文條件'])
         return df
     
     def getChinesetoEnglishDict(self):
@@ -116,7 +104,7 @@ class Parser104:
             elif (salaryStr.find('面議')>=0) :
                 baseSalary = 40000
         except:
-            print(salaryStr)
+            print("Error in __getSalary: {}".format(baseSalary))
         return baseSalary
 
 
@@ -125,24 +113,13 @@ class Parser104:
     # input  = "1至2人"
     # output = 1
     def __getRequiredEmp(self,requiredStr):
+        requiredNum = 0
         try:
-            requiredNum = 0
-            if(requiredStr.find('至')>=0):
-                requiredNum = int(requiredStr[0:requiredStr.find('至')])
-            elif(requiredStr.find('人')>=0):
-                requiredNum = int(requiredStr[0:requiredStr.find('人')-1])
-                #.strip()
-            elif(requiredStr.find('不限')>=0):  
-                return '不限'
-
-            if(requiredNum >= 10):
-                return '不限'
-            else:
-                return requiredNum
+            requiredNum = int( requiredStr[0: min(requiredStr.find('人'),requiredStr.find('至'))] )
         except:
-            print(requiredStr)
-
-
+            return requiredStr
+        return requiredNum
+        
     #抓學歷要求
     # input  = "專科、大學、碩士", "高中以上"
     # output = "專科" , "高中"
@@ -168,7 +145,6 @@ class Parser104:
             return '英文 讀寫/精通'
         else:
             return 'NA'
-
 
 
 
@@ -271,15 +247,14 @@ class User104:
                 url_segment = url_segment + "%"
 
         return url_segment
+
     def get_query(self):
         return self.query
     
-    def get_filename(self,name):
-        filename = "jobs104_"+str(datetime.datetime.now().date()).replace("-","")+"_" + name + ".xlsx"
-        return filename
 
-def test_parse104():
-    filepath = '../Data/jobs104_20190808_myfile.xlsx'
+
+def test_parse104_excel():
+    filepath = '../Data/test.xlsx'
     sheet = "Sheet1"
     configPath = '../conf/104_config.xlsx'
     workingAreaSheet = '上班地點'
@@ -287,8 +262,18 @@ def test_parse104():
     parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
     parser104.parse104Excel(filepath,sheet)
 
-def test_user104():
-    singleRoTestList = ['兼職']
+def test_parse104_dataframe(user):
+    testdf = pandas.read_excel('../Data/test.xlsx')
+
+    configPath = '../conf/104_config.xlsx'
+    workingAreaSheet = '上班地點'
+    appliedNumberSheet= '目前應徵人數'
+    parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
+    parsed_df = parser104.parse104Dataframe(testdf)
+    parsed_df.to_excel(user.get_filename('test_parsed'))
+
+if __name__ == "__main__":
+    singleRoTestList = ['全部']
     keywordTestList = ["新光","銀行"]
     areaTestList = ["台北市"]
     jobcatTestList = ["資訊軟體系統類"]
@@ -299,9 +284,6 @@ def test_user104():
         areaList=areaTestList,
         jobcatList=jobcatTestList,
         indcatList=indcatTestList)
-    #print(u.get_filename("myfile"))
     print(user.get_query())
 
-if __name__ == '__main__':
-    test_user104()
     
