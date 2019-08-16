@@ -15,7 +15,7 @@ class Parser104:
 
     def parse104Excel(self,filepath,sheet="Sheet1"):
         df = pandas.read_excel(io=filepath,sheet_name=sheet)
-        self.parse104Dataframe(df)
+        df = self.parse104Dataframe(df)
         dirname = os.path.dirname(filepath)
         filename = os.path.splitext(filepath)[0] + "_parsed.xlsx"
         df.to_excel(os.path.join(dirname,filename))
@@ -37,37 +37,48 @@ class Parser104:
             with open('../conf/stopword.txt', encoding="utf8") as f:
                 stopwords = [self.__cleanJiebaText(line) for line in f.readlines()]
                 df.at[i,'斷詞分析'] = ";".join( [word for word in jieba.cut(self.__cleanJiebaText(df.at[i,'合併欄位']), cut_all=False) if word not in stopwords] )
+        df = self.arrangeDataFrameOrder(df)
         return df
-    
-    def getChinesetoEnglishDict(self):
-        CtoEDict = {
+
+    def arrangeDataFrameOrder(self,df):
+        jobmapping = self.jobMappingDict()
+        df = df[[k for k in jobmapping]]
+        #rename columns from chinese to english
+        #df = df.rename(columns=jobmapping)
+        return df
+
+    def jobMappingDict(self):
+        #Chinese to English Dict
+        CEDict = {
+            '工作編號':'jobno',
+            '工作名稱':'jobname', 
+            '公司':'company', 
             '應徵人數':'appliedNumber',
-            '職務類別':'jobCategory',
+            '需求人數':'required',
             '工作待遇':'salary',
-            '工作性質':'nature',
+            '職務類別':'jobCategory',
+            '擅長工具':'tool',
             '上班地點':'workingAddress',
+            '工作性質':'nature',
             '管理責任':'manage',
             '出差外派':'travel',
             '上班時段':'working',
             '休假制度':'vacation',
             '可上班日':'available',
-            '需求人數':'required',
-            '接受身分':'identity',
+            '接受身份':'identity', 
             '工作經歷':'experience',
             '學歷要求':'education',
             '科系要求':'department',
             '語文條件':'language',
-            '擅長工具':'tool',
             '工作技能':'skill',
             '其他條件':'other',
-            '聯絡人':'contact',
-            '工作編號':'jobno',
-            '工作名稱':'jobname', 
-            '公司':'company', 
-            '工作連結':'joblink',
             '工作內容':'jobContent',
+            '合併欄位':'combinedColumns',
+            '斷詞分析':'wordAnalysis',
+            '工作連結':'joblink',
+            '聯絡人':'contact',
         }
-        return CtoEDict
+        return CEDict
 
     def __cleanJiebaText(self,uncleanStr):
         uncleanStr = re.sub(r"\d+"," ",uncleanStr)

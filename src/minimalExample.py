@@ -16,8 +16,8 @@ def get_filename(directory,is_parsed):
 
 def get_url():
     singleRoTestList = ['全部']
-    keywordTestList = ["新光銀行行銷"]
-    areaTestList = ["台北市"]
+    keywordTestList = ["新光銀行"]
+    areaTestList = [""]
     jobcatTestList = ["軟體／工程類人員"]
     indcatTestList = ["金融機構及其相關業"]
     url =URLMaker104(
