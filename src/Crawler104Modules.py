@@ -1,7 +1,10 @@
 import numpy
 import pandas
+import jieba
+import re
 import os
 import datetime
+from settings import configPath,workingAreaSheet,appliedNumberSheet
 
 class Parser104:
     
@@ -16,10 +19,11 @@ class Parser104:
         dirname = os.path.dirname(filepath)
         filename = os.path.splitext(filepath)[0] + "_parsed.xlsx"
         df.to_excel(os.path.join(dirname,filename))
-        print("finished parsing 104excel at {}...".format(os.path.join(dirname,filename)))
+        print("finished parsing 104excel at {}...".format(filepath))
         
-
     def parse104Dataframe(self,df):
+        df['合併欄位'] = ''
+        df['斷詞分析'] = ''
         for i in df.index:
             df.at[i,'應徵人數'] = self.__getAppliedNumber(df.at[i,'應徵人數'])
             df.at[i,'上班地點'] = self.__getWorkingArea(df.at[i,'上班地點'])
@@ -27,6 +31,12 @@ class Parser104:
             df.at[i,'需求人數'] = self.__getRequiredEmp(df.at[i,'需求人數'])
             df.at[i,'學歷要求'] = self.__getRequiredDegree(df.at[i,'學歷要求'])
             df.at[i,'語文條件'] = self.__getLanguageData(df.at[i,'語文條件'])
+
+            df.at[i,'合併欄位'] = df.at[i,'工作名稱'] + df.at[i,'工作內容'] + df.at[i,'其他條件']
+            df.at[i,'合併欄位'] = df.at[i,'合併欄位'].upper()
+            with open('../conf/stopword.txt', encoding="utf8") as f:
+                stopwords = [self.__cleanJiebaText(line) for line in f.readlines()]
+                df.at[i,'斷詞分析'] = ";".join( [word for word in jieba.cut(self.__cleanJiebaText(df.at[i,'合併欄位']), cut_all=False) if word not in stopwords] )
         return df
     
     def getChinesetoEnglishDict(self):
@@ -58,6 +68,10 @@ class Parser104:
             '工作內容':'jobContent',
         }
         return CtoEDict
+
+    def __cleanJiebaText(self,uncleanStr):
+        uncleanStr = re.sub(r"\d+"," ",uncleanStr)
+        return uncleanStr.replace(' ','').replace('\n','').replace('\r','')
 
     def __getAppliedNumberDict(self,filepath,sheet):
         appliedNumberDict = {}
@@ -92,19 +106,32 @@ class Parser104:
     # output = 28000
     #bug!
     def __getSalary(self,salaryStr):
-        baseSalary = 0
+        salaryStr = salaryStr.replace(' ','').replace(',','')
+        startIndex = 999
+        endIndex = 999
+
+        if(salaryStr.find('月薪')>=0):
+            startIndex = salaryStr.find('薪')+1
+            endIndex = salaryStr.find('~')
+            if (endIndex == -1):
+                endIndex = salaryStr.find('元')
+            salaryStr = salaryStr[startIndex:endIndex]
+                
+        elif(salaryStr.find('時薪')>=0):
+            startIndex = salaryStr.find('薪')+1
+            endIndex = salaryStr.find('~')
+            if (endIndex == -1):
+                endIndex = salaryStr.find('元')
+            salaryStr = salaryStr[startIndex:endIndex]
+            
+        elif (salaryStr.find('面議')>=0) :
+            salaryStr = "40000"
+            
+        baseSalary = 0    
         try:
-            if(salaryStr.find('月薪')>=0):
-                # get position of ~
-                endPosition = salaryStr.find('~')
-                baseSalaryStr = salaryStr[salaryStr.find('月薪')+3:endPosition]
-                baseSalaryStr = baseSalaryStr.replace(',','')
-                baseSalaryStr = baseSalaryStr.replace('元','')
-                baseSalary = int(baseSalaryStr)
-            elif (salaryStr.find('面議')>=0) :
-                baseSalary = 40000
+            baseSalary = int(salaryStr)
         except:
-            print("Error in __getSalary: {}".format(baseSalary))
+            print("Error in Crawler104Modules.__getSalary: {}".format(salaryStr))
         return baseSalary
 
 
@@ -146,29 +173,21 @@ class Parser104:
         else:
             return 'NA'
 
+ 
 
-
-
-
-
-class User104:
+class URLMaker104:
     def paradef(self):
         return ""
         #### 參數解釋 ####
         # ro:         0(全部),1(全職),2(兼職),3(高階),4(派遣),5(接案),6(家教)
-        # order:     11(依日期排序), 4(依學歷排序)
-        # asc:       1(ascending=true), 0(ascending=false)
-        # mode:      s(摘要),l(列表)
+        # order:     11(依日期排序), 4(依學歷排序), asc: 1(ascending=true), 0(ascending=false), mode: s(摘要),l(列表)
         # page:      <int>(第幾頁)
         # jobsource: 
         # example: 'https://www.104.com.tw/jobs/search/?ro=1&order=11&asc=0&mode=s&jobsource=indexpoc2018&page=1
 
         #### 額外參數 ####
         # 參數使用範例:  多於一個參數用 % 隔開
-        #              url = url + &jobcat=2007001000%2007002000%2007000000
-        #              url = url + &area=6001001000%2C6001002000
-        #              url = url + '&indcat=1004000000'
-        #              url = url + &keyword=國泰人壽
+        #              url = url + &<PARAMETER>=2007001000%2007002000%2007000000
         # ro 工作型態        
         # jobcat 職務類別
         # area 地區
@@ -176,10 +195,10 @@ class User104:
         # keyword 額外關鍵字搜尋
 
     def __init__(self,keywordList,singleRoList,areaList,jobcatList,indcatList):
-        self.roDict = self.get_ro_dict()
-        self.areaDict = self.get_area_dict()
-        self.jobcatDict = self.get_jobcat_dict()
-        self.indcatDict = self.get_indcat_dict()
+        self.roDict = self.ro_dict()
+        self.areaDict = self.area_dict()
+        self.jobcatDict = self.jobcat_dict()
+        self.indcatDict = self.indcat_dict()
         
         self.query= self.generate_query(
                 keywordList,
@@ -188,43 +207,30 @@ class User104:
                 [self.jobcatDict[jobcat] for jobcat in jobcatList],
                 [self.indcatDict[indcat] for indcat in indcatList],
             )
-    def get_ro_dict(self):
-        ro_dict = {
-            "":"",
-            "全部":"0","全職":"1","兼職":"2","高階":"3","派遣":4,"接案":5,"家教":6
-        }
+    def ro_dict(self):
+        ro_dict = {"":"","全部":"0","全職":"1","兼職":"2","高階":"3","派遣":4,"接案":5,"家教":6 }
         return ro_dict
-    def get_area_dict(self):
+    def area_dict(self):
         area_dict = {
             "":"",
-            "台北市" : "6001001000", "新北市" : "2C6001002000" , "桃園市" : "6001005000"
+            "台北市" : "6001001000", "新北市" : "2C6001002000" , "桃園市" : "6001005000",
+            "基隆市" : "6001004000", "台中市" : "6001008000"
         }
         return area_dict
-    def get_jobcat_dict(self):
+    def jobcat_dict(self):
         jobcat_dict = {
             "":"",
             "資訊軟體系統類" : "2007000000", "軟體／工程類人員" : "2007001000" , "MIS程式設計師" : "2007002000" ,
-            "金融專業相關類人員" : "2003002000", 
+            "財會/金融專業類":"2003000000","金融專業相關類人員" : "2003002000", "財務/會計/稅務類" : "2003001000", 
             "國外業務人員":"2005003005",
         }
         return jobcat_dict
-    def get_indcat_dict(self):
+    def indcat_dict(self):
         indcat_dict = {
             "":"",
-            "金融投顧及保險業" : "1004000000", "投資理財相關業" : "1004002000" , "金融機構及其相關業" : "1004001000" 
+            "金融投顧及保險業" : "1004000000", "投資理財相關業" : "1004002000" , "金融機構及其相關業" : "1004001000", 
         }
         return indcat_dict
-    
-    
-    def get_test_url(self):
-        url = self.generate_query( 
-            keywordList=["新光銀行","行銷"],
-            singleRoList=['0'],
-            areaList=["6001001000","2C6001002000"],
-            jobcatList=["2007000000","2003002000"],
-            indcatList=["1004000000","1004002000"]
-        )
-        return url
 
     def generate_query(self,keywordList,singleRoList,areaList,jobcatList,indcatList):
         fullurl = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}'
@@ -252,22 +258,13 @@ class User104:
         return self.query
     
 
-
 def test_parse104_excel():
     filepath = '../Data/test.xlsx'
-    sheet = "Sheet1"
-    configPath = '../conf/104_config.xlsx'
-    workingAreaSheet = '上班地點'
-    appliedNumberSheet= '目前應徵人數'
     parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
-    parser104.parse104Excel(filepath,sheet)
+    parser104.parse104Excel(filepath)
 
 def test_parse104_dataframe(user):
     testdf = pandas.read_excel('../Data/test.xlsx')
-
-    configPath = '../conf/104_config.xlsx'
-    workingAreaSheet = '上班地點'
-    appliedNumberSheet= '目前應徵人數'
     parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
     parsed_df = parser104.parse104Dataframe(testdf)
     parsed_df.to_excel(user.get_filename('test_parsed'))
