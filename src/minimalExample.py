@@ -15,7 +15,7 @@ def store_file(directory,name,is_parsed):
 
 def get_url():
     singleRoTestList = ['全部']
-    keywordTestList = ["新光銀行"]
+    keywordTestList = [""]
     areaTestList = [""]
     jobcatTestList = ["軟體／工程類人員"]
     indcatTestList = ["金融機構及其相關業"]
@@ -44,10 +44,10 @@ def parsed_example():
 
 def parse_unparsed_excel():
     parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
-    parser104.parse104Excel("../Data/jobs104_20190816_金融軟體人員.xlsx")
+    parser104.parse104Excel("../Data/jobs104_20190819_金融軟體人員.xlsx")
 
 
 if __name__ == "__main__":
-    parsed_example()
+    parse_unparsed_excel()
 
     

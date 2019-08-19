@@ -35,7 +35,7 @@ class Parser104:
             df.at[i,'工作經歷'] = self.__getJobExperience(df.at[i,'工作經歷'])
             df.at[i,'職務類別'] = self.__getJobCategory(df.at[i,'職務類別'])
 
-            df.at[i,'合併欄位'] = df.at[i,'工作名稱'] + df.at[i,'工作內容'] + df.at[i,'其他條件']
+            df.at[i,'合併欄位'] = str(df.at[i,'工作名稱']) + str(df.at[i,'工作內容']) + str(df.at[i,'其他條件'])
             df.at[i,'合併欄位'] = df.at[i,'合併欄位'].upper()
             with open('../conf/stopword.txt', encoding="utf8") as f:
                 stopwords = [self.__cleanJiebaText(line) for line in f.readlines()]
@@ -106,12 +106,13 @@ class Parser104:
         
     def __getAppliedNumber(self,appliedNumberStr):
         return self.appliedNumberDict.get(appliedNumberStr)
-        
+
     def __getJobCategory(self,jobCateStr):
+        jobCateStr = str(jobCateStr)
         return jobCateStr.replace(" ",'').replace("認識「」職務詳細職類分析(工作內容、薪資分布..)更多相關工作","")
 
     def __getJobExperience(self,jobExpStr):
-        jobExpStr = jobExpStr
+        jobExpStr = str(jobExpStr)
         if(jobExpStr.find('年')>=0):
             jobExpStr = jobExpStr[0:jobExpStr.find('年')]
         elif(jobExpStr.find('不拘')>=0):
@@ -126,6 +127,7 @@ class Parser104:
         
     def __getManage(self,manageStr):
         isManage = False
+        manageStr = str(manageStr)
         if(manageStr.find('不需負擔')>=0):
             isManage = False
         else:
@@ -135,9 +137,13 @@ class Parser104:
     #bug!
     def __getWorkingArea(self,workingStr):
         retVal = ""
-        for key in self.workingAreaDict:
-            if(workingStr.find(key)>=0):
-                retVal = self.workingAreaDict[key]
+        workingStr = str(workingStr)
+        try:
+            for key in self.workingAreaDict:
+                if(workingStr.find(key)>=0):
+                    retVal = self.workingAreaDict[key]
+        except:
+            print("Error in Crawler104Modules.__getWorkingArea: {}".format(workingStr))
         return retVal     
 
     #抓薪水
@@ -145,10 +151,10 @@ class Parser104:
     # output = 28000
     #bug!
     def __getSalary(self,salaryStr):
-        salaryStr = salaryStr.replace(' ','').replace(',','')
         startIndex = 999
         endIndex = 999
-
+        salaryStr = str(salaryStr)
+        salaryStr = salaryStr.replace(' ','').replace(',','')
         if(salaryStr.find('月薪')>=0):
             startIndex = salaryStr.find('薪')+1
             endIndex = salaryStr.find('~')
@@ -162,10 +168,16 @@ class Parser104:
             if (endIndex == -1):
                 endIndex = salaryStr.find('元')
             salaryStr = salaryStr[startIndex:endIndex]
-            
+
+        elif(salaryStr.find('年薪')>=0):
+            startIndex = salaryStr.find('薪')+1
+            endIndex = salaryStr.find('~')
+            if (endIndex == -1):
+                endIndex = salaryStr.find('元')
+            salaryStr = salaryStr[startIndex:endIndex]
+        
         elif (salaryStr.find('面議')>=0) :
             salaryStr = "40000"
-            
         baseSalary = 0    
         try:
             baseSalary = int(salaryStr)
@@ -179,10 +191,13 @@ class Parser104:
     # input  = "1至2人"
     # output = 1
     def __getRequiredEmp(self,requiredStr):
+        requiredStr = str(requiredStr)
         if(requiredStr.find('人')>=0):
             requiredStr = requiredStr[0: min(requiredStr.find('人'),requiredStr.find('至'))] 
         elif(requiredStr.find('不限')>=0):
             requiredStr = '999'
+
+        requiredNum = 0
         try:
             requiredNum = int(requiredStr)
         except:
@@ -193,6 +208,7 @@ class Parser104:
     # input  = "專科、大學、碩士", "高中以上"
     # output = "專科" , "高中"
     def __getRequiredDegree(self,requiredDegreeStr):
+        requiredDegreeStr = str(requiredDegreeStr)
         if(requiredDegreeStr.find('高中')>=0):
             return '高中'
         elif(requiredDegreeStr.find('專科')>=0):
@@ -208,6 +224,7 @@ class Parser104:
 
     # 英文要求
     def __getLanguageData(self,languageStr):
+        languageStr = str(languageStr)
         if(languageStr.find('英文')>=0 and
            languageStr.find('讀 /精通')>=0 and
            languageStr.find('寫 /精通')>=0 ):
