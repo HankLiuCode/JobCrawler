@@ -31,12 +31,15 @@ class Parser104:
             df.at[i,'需求人數'] = self.__getRequiredEmp(df.at[i,'需求人數'])
             df.at[i,'學歷要求'] = self.__getRequiredDegree(df.at[i,'學歷要求'])
             df.at[i,'語文條件'] = self.__getLanguageData(df.at[i,'語文條件'])
+            df.at[i,'管理責任'] = self.__getManage(df.at[i,'管理責任'])
+            df.at[i,'工作經歷'] = self.__getJobExperience(df.at[i,'工作經歷'])
+            df.at[i,'職務類別'] = self.__getJobCategory(df.at[i,'職務類別'])
 
             df.at[i,'合併欄位'] = df.at[i,'工作名稱'] + df.at[i,'工作內容'] + df.at[i,'其他條件']
             df.at[i,'合併欄位'] = df.at[i,'合併欄位'].upper()
             with open('../conf/stopword.txt', encoding="utf8") as f:
                 stopwords = [self.__cleanJiebaText(line) for line in f.readlines()]
-                df.at[i,'斷詞分析'] = ";".join( [word for word in jieba.cut(self.__cleanJiebaText(df.at[i,'合併欄位']), cut_all=False) if word not in stopwords] )
+                df.at[i,'斷詞分析'] = "、".join( [word for word in jieba.cut(self.__cleanJiebaText(df.at[i,'合併欄位']), cut_all=False) if word not in stopwords] )
         df = self.arrangeDataFrameOrder(df)
         return df
 
@@ -62,10 +65,6 @@ class Parser104:
             '工作性質':'nature',
             '管理責任':'manage',
             '出差外派':'travel',
-            '上班時段':'working',
-            '休假制度':'vacation',
-            '可上班日':'available',
-            '接受身份':'identity', 
             '工作經歷':'experience',
             '學歷要求':'education',
             '科系要求':'department',
@@ -77,6 +76,10 @@ class Parser104:
             '斷詞分析':'wordAnalysis',
             '工作連結':'joblink',
             '聯絡人':'contact',
+            '上班時段':'working',
+            '休假制度':'vacation',
+            '可上班日':'available',
+            '接受身份':'identity', 
         }
         return CEDict
 
@@ -103,6 +106,31 @@ class Parser104:
         
     def __getAppliedNumber(self,appliedNumberStr):
         return self.appliedNumberDict.get(appliedNumberStr)
+        
+    def __getJobCategory(self,jobCateStr):
+        return jobCateStr.replace(" ",'').replace("認識「」職務詳細職類分析(工作內容、薪資分布..)更多相關工作","")
+
+    def __getJobExperience(self,jobExpStr):
+        jobExpStr = jobExpStr
+        if(jobExpStr.find('年')>=0):
+            jobExpStr = jobExpStr[0:jobExpStr.find('年')]
+        elif(jobExpStr.find('不拘')>=0):
+            jobExpStr = "0"
+        
+        jobExp = 0
+        try:
+            jobExp = int(jobExpStr)
+        except:
+            print("Error in Crawler104Modules.__getJobExperience: {}".format(jobExpStr))
+        return jobExp
+        
+    def __getManage(self,manageStr):
+        isManage = False
+        if(manageStr.find('不需負擔')>=0):
+            isManage = False
+        else:
+            isManage = True
+        return isManage
 
     #bug!
     def __getWorkingArea(self,workingStr):
@@ -151,11 +179,14 @@ class Parser104:
     # input  = "1至2人"
     # output = 1
     def __getRequiredEmp(self,requiredStr):
-        requiredNum = 0
+        if(requiredStr.find('人')>=0):
+            requiredStr = requiredStr[0: min(requiredStr.find('人'),requiredStr.find('至'))] 
+        elif(requiredStr.find('不限')>=0):
+            requiredStr = '999'
         try:
-            requiredNum = int( requiredStr[0: min(requiredStr.find('人'),requiredStr.find('至'))] )
+            requiredNum = int(requiredStr)
         except:
-            return requiredStr
+            print("Error in Crawler104Modules.__getRequiredEmp: {}".format(requiredStr))
         return requiredNum
         
     #抓學歷要求

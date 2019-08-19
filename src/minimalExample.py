@@ -5,8 +5,7 @@ import pandas
 import datetime
 import os
 
-def get_filename(directory,is_parsed):
-    name = "金融軟體人員"
+def store_file(directory,name,is_parsed):
     filename = "jobs104_"+ str(datetime.datetime.now().date()).replace("-","")+"_" + name 
     if(is_parsed):
         filename += '_parsed'
@@ -33,7 +32,7 @@ def basic_example():
     url = get_url()
     crawler104=Crawler104(url)
     df=pandas.DataFrame(crawler104.getAllJobs())
-    df.to_excel(get_filename(dataDirectory,False))
+    df.to_excel(store_file(dataDirectory,"金融軟體人員",False))
 
 def parsed_example():
     url = get_url()
@@ -41,13 +40,14 @@ def parsed_example():
     parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
     df=pandas.DataFrame(crawler104.getAllJobs())
     parsed_df = parser104.parse104Dataframe(df)
-    parsed_df.to_excel(get_filename(dataDirectory,True))
+    parsed_df.to_excel(store_file(dataDirectory,"金融軟體人員",True))
 
 def parse_unparsed_excel():
     parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
     parser104.parse104Excel("../Data/jobs104_20190816_金融軟體人員.xlsx")
 
+
 if __name__ == "__main__":
-    parse_unparsed_excel()
+    parsed_example()
 
     

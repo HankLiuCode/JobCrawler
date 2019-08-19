@@ -30,7 +30,7 @@ if __name__ == "__main__":
     seg_list = []
     with open('../conf/stopword.txt', encoding="utf8") as f:
         stopwords = [cleanText(line) for line in f.readlines()]
-        seg_list = [word for word in jieba.cut(cleanText(df.at[0,'合併欄位']), cut_all=False) if word not in stopwords]
+        fseg_list = [word for word in jieba.cut(cleanText(df.at[0,'合併欄位']), cut_all=False) if word not in stopwords]
 
     print("Default Mode: " + ";".join(seg_list))  # 精确模式
         
