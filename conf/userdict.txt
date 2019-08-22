@@ -5,3 +5,6 @@ JAVA SCRIPT
 MICRO SERVICE
 VISUAL STUDIO
 機器學習
+工程師
+分析師
+開發人員

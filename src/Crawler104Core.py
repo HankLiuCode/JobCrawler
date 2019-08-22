@@ -5,14 +5,14 @@ from requests.adapters import HTTPAdapter
 import time
 import pandas
 
-class Crawler104:
-    def __init__(self,user104):
+class Crawler104Core:
+    def __init__(self,rootURL):
         self.header_info = {
             'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
             'Accept-Language':'zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4',
             'Connection':'close'
         }
-        self.rootURL = user104.get_query()
+        self.rootURL = rootURL
         self.processedJob = []
         
     # if the element chosen has children
@@ -29,9 +29,9 @@ class Crawler104:
 
     def __cleanText(self,text):
         #replace blank lines
-        text = text.replace('\n','').replace('\t','').replace('\r','')
+        text = text.strip().replace('\n','').replace('\t','').replace('\r','')
         #replace unwanted chars
-        text = text.replace(' ','').replace('：','')
+        text = text.replace('：','')
         return text
 
     def __isProcessed(self,jobno):
@@ -104,15 +104,17 @@ class Crawler104:
                 jobname = job.select_one('.js-job-link').text
                 joblink = job.select_one('.js-job-link')['href']
                 joblink = 'https:' + joblink
-            
+
+
                 company = job.select_one('.b-list-inline a').text
                 company = self.__cleanText(company)
 
                 jobDetail = self.getJobDetail(joblink)
-                moreJobDetail = {'工作名稱':jobname, '公司':company, '工作連結':joblink}
-                jobDetail.update(moreJobDetail)
-
-                jobList.append(jobDetail)
+                #not tested yet
+                if jobDetail:
+                    moreJobDetail = {'工作名稱':jobname, '公司':company, '工作連結':joblink}
+                    jobDetail.update(moreJobDetail)
+                    jobList.append(jobDetail)
                 print( '[{}/{}] {}'.format(currentCount,totalCount,joblink))
                 currentCount += 1 
                 time.sleep(0.1)

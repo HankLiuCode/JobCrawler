@@ -3,3 +3,4 @@ workingAreaSheet = '上班地點'
 appliedNumberSheet= '目前應徵人數'
 
 dataDirectory='../Data'
+configDirectory='../conf'

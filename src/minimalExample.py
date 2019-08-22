@@ -1,5 +1,5 @@
-from Crawler104Modules import URLMaker104, Parser104
-from Crawler104Core import Crawler104
+from crawler104Modules import URLMaker104, Parser104
+from crawler104Core import Crawler104
 from settings import configPath,workingAreaSheet,appliedNumberSheet,dataDirectory
 import pandas
 import datetime
@@ -32,7 +32,7 @@ def basic_example():
     url = get_url()
     crawler104=Crawler104(url)
     df=pandas.DataFrame(crawler104.getAllJobs())
-    df.to_excel(store_file(dataDirectory,"金融軟體人員",False))
+    df.to_excel(store_file(dataDirectory,"金融軟體人員",False),index=False)
 
 def parsed_example():
     url = get_url()
@@ -44,10 +44,10 @@ def parsed_example():
 
 def parse_unparsed_excel():
     parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
-    parser104.parse104Excel("../Data/jobs104_20190819_金融軟體人員.xlsx")
+    parser104.parse104Excel("../Data/jobs104_20190820_金融軟體人員.xlsx",index=False)
 
 
 if __name__ == "__main__":
-    parse_unparsed_excel()
+    basic_example()
 
     
