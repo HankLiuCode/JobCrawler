@@ -6,15 +6,15 @@ import time
 import pandas
 
 class Crawler104Core:
-    def __init__(self,rootURL):
+    def __init__(self):
         self.header_info = {
             'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
             'Accept-Language':'zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4',
             'Connection':'close'
         }
-        self.rootURL = rootURL
+        self.root_url = None
         self.processedJob = []
-        
+    
     # if the element chosen has children
     def __getElementsText(self,elements):
         seperate_char = "、"
@@ -36,87 +36,118 @@ class Crawler104Core:
 
     def __isProcessed(self,jobno):
         if jobno in self.processedJob:
-            print("{} is proccesed".format(jobno))
             return True
         return False
-    
-    def __getTotal(self,searchStr):
-        retryRequest = requests.Session()
-        retryRequest.mount( 'https://', HTTPAdapter( max_retries = 5 ) )
-        res = retryRequest.get( self.rootURL.format(1),headers=self.header_info, timeout=5, verify=False)
-        soup = BeautifulSoup(res.text,'html.parser')
-        total = int( re.search( r'\"{}\":(\d*)'.format(searchStr), soup.text).group(1))
-        return total
 
     def getJobDetail(self,joblink):
         jobDetailDict = {}
         if (not re.search( r'job/(.*)\?jobsource', joblink ) == None):
             jobno = re.search( r'job/(.*)\?jobsource', joblink ).group(1)
-            jobDetailDict = self.getStandardJobDetail(jobno)
+            if not self.__isProcessed(jobno):
+                jobDetailDict = self.getStandardJobDetail(jobno)
+            else:
+                print("{} is proccesed".format(jobno))
         else:
-            print("joblink invalid!")
+            print("joblink invalid : {}".format(joblink))
         return jobDetailDict
-
+    
+    #抓取104一般的網頁格式(全職,兼職) 派遣,接案,家教等不包括在此
     def getStandardJobDetail(self,jobno):
         url = 'https://www.104.com.tw/job/{}'
         retryRequest = requests.Session()
         retryRequest.mount( 'https://', HTTPAdapter( max_retries = 5 ) )
         res = retryRequest.get( url.format(jobno),headers=self.header_info, timeout=5,verify=False)
         soup = BeautifulSoup( res.text, 'html.parser')
-        #dict that has chinese as key
-        jobDetailDict={}
 
         appliedNumber = self.__cleanText(soup.select_one('.sub a').text).replace("應徵","")
         jobContent = self.__cleanText(soup.select_one('.content p').text)
-        jobDetailDict['工作編號'] = jobno
-        jobDetailDict['應徵人數'] = appliedNumber
-        jobDetailDict['工作內容'] = jobContent
-
+        #dict that has chinese as key
+        jobDetailDict = {
+            '工作編號': jobno,
+            '工作名稱':'', 
+            '公司':'', 
+            '應徵人數': appliedNumber,
+            '需求人數':'',
+            '工作待遇':'',
+            '職務類別':'',
+            '上班地點':'',
+            '工作性質':'',
+            '管理責任':'',
+            '出差外派':'',
+            '工作經歷':'',
+            '學歷要求':'',
+            '科系要求':'',
+            '語文條件':'',
+            '擅長工具':'',
+            '具備證照':'',
+            '工作技能':'',
+            '其他條件':'',
+            '工作內容': jobContent,
+            '合併欄位':'',
+            '斷詞分析':'',
+            '工作連結':'',
+        }
         #gets all other columns for jobdetail
         content_keys = soup.select(".content dt")
         content_vals = soup.select('.content dd')
         index = -1
         for key in content_keys:
             index += 1
-            jobDetailDict[self.__cleanText(key.text)] = self.__cleanText(content_vals[index].text)
+            if self.__cleanText(key.text) in jobDetailDict:
+                jobDetailDict[self.__cleanText(key.text)] = self.__cleanText(content_vals[index].text)
+        
+        jobDetailDict["職務類別"] = jobDetailDict["職務類別"].replace(" ",'').replace("認識「」職務詳細職類分析(工作內容、薪資分布..)更多相關工作","")
+        jobDetailDict['上班地點'] = jobDetailDict['上班地點'].replace(" ",'').replace("地圖找工作","")
         
         self.processedJob.append(jobno)
         #print(jobDetailDict)
         return jobDetailDict
 
-    def getAllJobs(self):
-        totalPage = self.__getTotal("totalPage")
-        totalCount = self.__getTotal("totalCount")
+    def getTotal(self,searchStr,url):
+        retryRequest = requests.Session()
+        retryRequest.mount( 'https://', HTTPAdapter( max_retries = 5 ) )
+        res = retryRequest.get( url.format(1),headers=self.header_info, timeout=5, verify=False)
+        soup = BeautifulSoup(res.text,'html.parser')
+        total = int( re.search( r'\"{}\":(\d*)'.format(searchStr), soup.text).group(1))
+        return total
+
+    def start_crawl(self,root_url):
+        self.root_url = root_url
+        print(self.root_url)
+        totalPage = self.getTotal("totalPage",self.root_url)
+        totalCount = self.getTotal("totalCount",self.root_url)
         currentPage = 1
         currentCount = 1
         jobItems = []
         jobList = []
+        try:
+            while(currentPage <= totalPage):
+                retryRequest = requests.Session()
+                retryRequest.mount( 'https://', HTTPAdapter( max_retries = 5 ) )
+                
+                res = retryRequest.get( self.root_url.format( currentPage ),headers=self.header_info, timeout=5, verify=False)
+                soup = BeautifulSoup(res.text,'html.parser')
+                print( 'Page: [{}/{}]'.format(currentPage,totalPage))
+                
+                jobItems = soup.select('.js-job-item')
+                for job in jobItems:
+                    jobname = job.select_one('.js-job-link').text
+                    joblink = job.select_one('.js-job-link')['href']
+                    joblink = 'https:' + joblink
 
-        while(currentPage <= totalPage):
-            retryRequest = requests.Session()
-            retryRequest.mount( 'https://', HTTPAdapter( max_retries = 5 ) )
-            res = retryRequest.get( self.rootURL.format( currentPage ),headers=self.header_info, timeout=5, verify=False)
-            soup = BeautifulSoup(res.text,'html.parser')
-            print( 'Page: [{}/{}]'.format(currentPage,totalPage))
-            
-            jobItems = soup.select('.js-job-item')
-            for job in jobItems:
-                jobname = job.select_one('.js-job-link').text
-                joblink = job.select_one('.js-job-link')['href']
-                joblink = 'https:' + joblink
 
+                    company = job.select_one('.b-list-inline a').text
+                    company = self.__cleanText(company)
 
-                company = job.select_one('.b-list-inline a').text
-                company = self.__cleanText(company)
-
-                jobDetail = self.getJobDetail(joblink)
-                #not tested yet
-                if jobDetail:
-                    moreJobDetail = {'工作名稱':jobname, '公司':company, '工作連結':joblink}
-                    jobDetail.update(moreJobDetail)
-                    jobList.append(jobDetail)
-                print( '[{}/{}] {}'.format(currentCount,totalCount,joblink))
-                currentCount += 1 
-                time.sleep(0.1)
-            currentPage += 1
+                    jobDetail = self.getJobDetail(joblink)
+                    #not tested yet
+                    if jobDetail:
+                        moreJobDetail = {'工作名稱':jobname, '公司':company, '工作連結':joblink}
+                        jobDetail.update(moreJobDetail)
+                        jobList.append(jobDetail)
+                    print( '[{}/{}] {}'.format(currentCount,totalCount,joblink))
+                    currentCount += 1
+                currentPage += 1
+        except KeyboardInterrupt:
+            return jobList
         return jobList
