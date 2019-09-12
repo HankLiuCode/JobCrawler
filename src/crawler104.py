@@ -8,7 +8,7 @@ import os
 class Crawler104:
     def __init__(self):
         self.crawlerCore = Crawler104Core()
-        self.df_unparsed = pandas.DataFrame({})
+        self.df_unparsed = pandas.DataFrame()
 
     def get_filepath(self, name):
         filename = "jobs104_"+ str(datetime.datetime.now().date()).replace("-","")+"_" + name
@@ -32,23 +32,38 @@ class Crawler104:
         to_filepath = os.path.join(parsedDirectory,filename)
         df.to_excel(to_filepath,index=False)
         print("finished parsing:  {} -> {}".format(from_filepath,to_filepath))
-    
+
+def feed_url(jobcat_url, urls):
+        urlTotal = myCrawler.crawlerCore.getTotal('totalCount',jobcat_url)
+        if urlTotal > 3000:
+            area_jobcat_url_taipei = jobcat_url + "&area=6001001000"
+            area_jobcat_url_xinbei = jobcat_url + "&area=6001002000"
+            area_jobcat_url_taoyuan = jobcat_url + "&area=6001005000"
+            area_jobcat_url_xinzhu = jobcat_url + "&area=6001006000"
+            area_jobcat_url_taichung = jobcat_url + "&area=6001008000"
+            area_jobcat_url_east = jobcat_url + "&area=6001003000%2C6001020000%2C6001019000%2C6001022000%2C6001023000%2C6001023000"
+            area_jobcat_url_south = jobcat_url + "&area=6001012000%2C6001013000%2C6001014000%2C6001016000%2C6001018000"
+            area_jobcat_url_others = jobcat_url + "&area=6001004000%2C6001007000%2C6001010000%2C6001011000"
+            urls.append(area_jobcat_url_taipei)
+            urls.append(area_jobcat_url_xinbei)
+            urls.append(area_jobcat_url_taoyuan)
+            urls.append(area_jobcat_url_xinzhu)
+            urls.append(area_jobcat_url_taichung)
+            urls.append(area_jobcat_url_east)
+            urls.append(area_jobcat_url_south)
+            urls.append(area_jobcat_url_others)
+        else:
+            urls.append(jobcat_url)
     
 if __name__ == "__main__":
-    # 參數使用範例:  多於一個參數用 % 隔開
-    #               url = url + &[Parameter]=[Value]%[Value]%[Value]
-    # ro 工作型態        
-    # jobcat 職務類別
-    # area 地區
-    # indcat 公司產業
-    # keyword 關鍵字搜尋
-
+    # 參數使用範例:  多於一個參數用 %2C 隔開
+    #               url = url + &[Parameter]=[Value]%2C[Value]%2C[Value]
+    # ro 工作型態, jobcat 職務類別, area 地區, indcat 公司產業, keyword 關鍵字搜尋
     # 額外參數
-    # order 排序方式
-    # asc 由低到高
+    # order 排序方式, asc 由低到高
     ro_dict = {"全部":"0","全職":"1","兼職":"2","高階":"3","派遣":"4","接案":"5","家教":"6" }
     area_dict = {
-            "基隆" : "6001004000", "台北" : "6001001000", "新北" : "2C6001002000",
+            "台北" : "6001001000", "新北" : "6001002000", "基隆" : "6001004000",
             "桃園" : "6001005000", "新竹" : "6001006000", "苗栗" : "6001007000",
             "台中" : "6001008000", "彰化" : "6001010000", "南投" : "6001011000",
             
@@ -100,30 +115,21 @@ if __name__ == "__main__":
     myCrawler = Crawler104()
     root_url = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}'
     urls = []
+    """
     for i in range(12):
         jobcat_url = root_url + "&jobcat=20070010{:02}".format(i+1)
-        urlTotal = myCrawler.crawlerCore.getTotal('totalCount',jobcat_url)
-        if urlTotal > 3000:
-            area_jobcat_url_taipei = jobcat_url + "&area=6001001000"
-            area_jobcat_url_xinbei = jobcat_url + "&area=2C6001002000"
-            area_jobcat_url_taoyuan = jobcat_url + "&area=6001005000"
-            area_jobcat_url_xinzhu = jobcat_url + "&area=6001006000"
-            area_jobcat_url_taichung = jobcat_url + "&area=6001008000"
-            area_jobcat_url_kaohsiung = jobcat_url + "&area=6001016000"
-            area_jobcat_url_others_1 = jobcat_url + "&area=6001003000%6001020000%6001019000%6001022000%6001023000%6001023000"
-            area_jobcat_url_others_2 = jobcat_url + "&area=6001004000%6001007000%6001010000%6001011000%6001012000%6001013000%6001014000%6001018000"
-        else:
-            urls.append(jobcat_url)
+        feed_url(jobcat_url, urls)
+    """
     for i in range(8):
         jobcat_url = root_url + "&jobcat=20070020{:02}".format(i+1)
-        urlTotal = myCrawler.crawlerCore.getTotal('totalCount',jobcat_url)
-        urls.append(jobcat_url)
-    
+        feed_url(jobcat_url, urls)
+
     for url in urls:
         urlTotal = myCrawler.crawlerCore.getTotal('totalCount',url)
-        #print("{} totalCount:{}".format(url,urlTotal))
-
-    myCrawler.start_crawl("https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}&jobcat=2007001006&indcat=1004002000")
-    myCrawler.generate_excel("Testing")
-
+        print("{} totalCount:{}".format(url,urlTotal))
+    """
+    for url in urls:
+        myCrawler.start_crawl(url)
+    myCrawler.generate_excel("test")
+    """
     #myCrawler.parse_unparsed_excel("../data/jobs104_20190912_IT產業.xlsx")
