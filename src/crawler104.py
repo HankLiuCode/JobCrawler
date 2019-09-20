@@ -1,9 +1,12 @@
 from crawler104Modules import Parser104
 from crawler104Core import Crawler104Core
-from settings import configPath,workingAreaSheet,appliedNumberSheet,dataDirectory,parsedDirectory
+import settings
 import pandas
 import datetime
 import os
+import re
+from multiprocessing import Manager as multiprocessing_Manager
+from xml.etree import ElementTree as xml_etree_ElementTree
 
 class Crawler104:
     def __init__(self):
@@ -13,7 +16,7 @@ class Crawler104:
     def get_filepath(self, name):
         filename = "jobs104_"+ str(datetime.datetime.now().date()).replace("-","")+"_" + name
         filename += ".xlsx"
-        filename = os.path.join(dataDirectory,filename)
+        filename = os.path.join(settings.dataDirectory,filename)
         return filename
 
     def start_crawl(self, url):
@@ -29,107 +32,49 @@ class Crawler104:
         df = parser104.parse104Dataframe(df)
         
         filename = os.path.basename(from_filepath) + "_parsed" + ".xlsx"
-        to_filepath = os.path.join(parsedDirectory,filename)
+        to_filepath = os.path.join(settings.parsedDirectory,filename)
         df.to_excel(to_filepath,index=False)
         print("finished parsing:  {} -> {}".format(from_filepath,to_filepath))
 
-def feed_url(jobcat_url, urls):
-        urlTotal = myCrawler.crawlerCore.getTotal('totalCount',jobcat_url)
-        if urlTotal > 3000:
-            area_jobcat_url_taipei = jobcat_url + "&area=6001001000"
-            area_jobcat_url_xinbei = jobcat_url + "&area=6001002000"
-            area_jobcat_url_taoyuan = jobcat_url + "&area=6001005000"
-            area_jobcat_url_xinzhu = jobcat_url + "&area=6001006000"
-            area_jobcat_url_taichung = jobcat_url + "&area=6001008000"
-            area_jobcat_url_east = jobcat_url + "&area=6001003000%2C6001020000%2C6001019000%2C6001022000%2C6001023000%2C6001023000"
-            area_jobcat_url_south = jobcat_url + "&area=6001012000%2C6001013000%2C6001014000%2C6001016000%2C6001018000"
-            area_jobcat_url_others = jobcat_url + "&area=6001004000%2C6001007000%2C6001010000%2C6001011000"
-            urls.append(area_jobcat_url_taipei)
-            urls.append(area_jobcat_url_xinbei)
-            urls.append(area_jobcat_url_taoyuan)
-            urls.append(area_jobcat_url_xinzhu)
-            urls.append(area_jobcat_url_taichung)
-            urls.append(area_jobcat_url_east)
-            urls.append(area_jobcat_url_south)
-            urls.append(area_jobcat_url_others)
-        else:
-            urls.append(jobcat_url)
+def jobcat_one(root_url,jobcat_param):
+    param_queue = multiprocessing_Manager().Queue()
+    param_queue.put(jobcat_param)
+
+    while not param_queue.empty():
+        param = param_queue.get()
+        url = root_url.format(param)
+        total = myCrawler.crawlerCore.getTotal("totalCount",url)
+        print("url:{} total:{}".format(url,total))
+
+        if total > 3000:
+            param_node = root.find('.//*[@value="{}"]'.format(param))
+            for child in param_node:
+                param_queue.put(child.attrib['value'])
+
+def jobcat_url_filter(url_list):
+    for url in url_list:
+        print(re.match("\d+",url))
     
 if __name__ == "__main__":
-    # 參數使用範例:  多於一個參數用 %2C 隔開
+    # 參數使用範例:  參數 > 1 用 %2C 隔開
     #               url = url + &[Parameter]=[Value]%2C[Value]%2C[Value]
-    # ro 工作型態, jobcat 職務類別, area 地區, indcat 公司產業, keyword 關鍵字搜尋
-    # 額外參數
-    # order 排序方式, asc 由低到高
+    # 參數:         ro 工作型態, jobcat 職務類別, area 地區, indcat 公司產業, keyword 關鍵字搜尋
+    # 額外參數:     order 排序方式, asc 由低到高
     ro_dict = {"全部":"0","全職":"1","兼職":"2","高階":"3","派遣":"4","接案":"5","家教":"6" }
-    area_dict = {
-            "台北" : "6001001000", "新北" : "6001002000", "基隆" : "6001004000",
-            "桃園" : "6001005000", "新竹" : "6001006000", "苗栗" : "6001007000",
-            "台中" : "6001008000", "彰化" : "6001010000", "南投" : "6001011000",
-            
-            "雲林" : "6001012000", "嘉義" : "6001013000", "台南" : "6001014000",
-            "高雄" : "6001016000", "屏東" : "6001018000",
-            
-            "宜蘭" : "6001003000", "花蓮" : "6001020000", "台東" : "6001019000",
-            "金門" : "6001022000", "馬祖" : "6001023000", "連江" : "6001023000",
-        }
-    jobcat_dict = {
-            "資訊軟體系統類":"2007000000", 
-                "軟體／工程類人員":"2007001000" , 
-                    "軟體專案主管":"2007001001",
-                    "電子商務技術主管":"2007001002",
-                    "通訊軟體工程師":"2007001003",
-                    "軟體設計工程師":"2007001004",
-                    "韌體設計工程師":"2007001005",
-                    "Internet程式設計師":"2007001006",
-                    "電腦系統分析師":"2007001007",
-                    "電玩程式設計師":"2007001008",
-                    "其他資訊專業人員":"2007001009",
-                    "資訊助理人員":"2007001010",
-                    "BIOS工程師":"2007001011",
-                    "演算法開發工程師":"2007001012",
-                "MIS程式設計師":"2007002000" ,
-                    "MIS/網管主管":"2007002001",
-                    "資料庫管理人員":"2007002002",
-                    "MIS程式設計師":"2007002003",
-                    "MES工程師":"2007002004",
-                    "網路管理工程師":"2007002005",
-                    "系統維護/操作人員":"2007002006",
-                    "資訊設備管制人員":"2007002007",
-                    "網路安全分析師":"2007002008",
-
-            "財會/金融專業類":"2003000000", 
-                "金融專業相關類人員" : "2003002000" , 
-                "財務/會計/稅務類" : "2003001000", 
-            
-            "國外業務人員":"2005003005",
-            "工讀生":"2002001011",
-        }
-    indcat_dict = {
-            "金融投顧及保險業" : "1004000000", "投資理財相關業" : "1004002000" , "金融機構及其相關業" : "1004001000", 
-        }
-    order_dict = { 
-            "符合度排序":"12","日期排序":"11","學歷":"4","經歷":"3","應徵人數":"7","待遇":"13"
-        }
+    order_dict = {"符合度排序":"12","日期排序":"11","學歷":"4","經歷":"3","應徵人數":"7","待遇":"13"}
     
+    xml_path = os.path.join(settings.configDirectory,'104_config.xml')
+    tree = xml_etree_ElementTree.parse(xml_path)
+    root = tree.getroot()
+
     myCrawler = Crawler104()
     root_url = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}'
+    jobcat_root_url = root_url + "&jobcat=2007001000"
     urls = []
-    """
-    for i in range(12):
-        jobcat_url = root_url + "&jobcat=20070010{:02}".format(i+1)
-        feed_url(jobcat_url, urls)
-    """
-    for i in range(8):
-        jobcat_url = root_url + "&jobcat=20070020{:02}".format(i+1)
-        feed_url(jobcat_url, urls)
+    urls.append(jobcat_root_url)
+    jobcat_url_filter(urls)
+    
 
-    for url in urls:
-        urlTotal = myCrawler.crawlerCore.getTotal('totalCount',url)
-        print("{} totalCount:{}".format(url,urlTotal))
-    """
-    for url in urls:
-        myCrawler.start_crawl(url)
-    myCrawler.generate_excel("test")
-    """
+    #myCrawler.generate_excel("test")
     #myCrawler.parse_unparsed_excel("../data/jobs104_20190912_IT產業.xlsx")
+
