@@ -12,7 +12,6 @@ class Crawler104Core:
             'Accept-Language':'zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4',
             'Connection':'close'
         }
-        self.root_url = None
         self.processedJob = []
     
     # if the element chosen has children
@@ -112,10 +111,9 @@ class Crawler104Core:
         return total
 
     def start_crawl(self,root_url):
-        self.root_url = root_url
-        print(self.root_url)
-        totalPage = self.getTotal("totalPage",self.root_url)
-        totalCount = self.getTotal("totalCount",self.root_url)
+        print(root_url)
+        totalPage = self.getTotal("totalPage",root_url)
+        totalCount = self.getTotal("totalCount",root_url)
         currentPage = 1
         currentCount = 1
         jobItems = []
@@ -125,7 +123,7 @@ class Crawler104Core:
                 retryRequest = requests.Session()
                 retryRequest.mount( 'https://', HTTPAdapter( max_retries = 5 ) )
                 
-                res = retryRequest.get( self.root_url.format( currentPage ),headers=self.header_info, timeout=5, verify=False)
+                res = retryRequest.get( root_url.format( currentPage ),headers=self.header_info, timeout=5, verify=False)
                 soup = BeautifulSoup(res.text,'html.parser')
                 print( 'Page: [{}/{}]'.format(currentPage,totalPage))
                 
