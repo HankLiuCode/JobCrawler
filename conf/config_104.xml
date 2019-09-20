@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<config>
+    <areas>
+        <area name="台北" value="6001001000">
+            <district name="中正區" value="6001001001"></district>
+            <district name="大同區" value="6001001002"></district>
+            <district name="中山區" value="6001001003"></district>
+            <district name="松山區" value="6001001004"></district>
+            <district name="大安區" value="6001001005"></district>
+            <district name="萬華區" value="6001001006"></district>
+            <district name="信義區" value="6001001007"></district>
+            <district name="士林區" value="6001001008"></district>
+            <district name="北投區" value="6001001009"></district>
+            <district name="內湖區" value="6001001010"></district>
+            <district name="南港區" value="6001001011"></district>
+            <district name="文山區" value="6001001012"></district>
+        </area>
+        <area name="新北" value="6001002000"></area>
+        <area name="宜蘭" value="6001003000"></area>
+        <area name="基隆" value="6001004000"></area>
+        <area name="桃園" value="6001005000"></area>
+        <area name="新竹" value="6001006000"></area>
+
+        <area name="苗栗" value="6001007000"></area>
+        <area name="台中" value="6001008000"></area>
+        <area name="彰化" value="6001010000"></area>
+        <area name="南投" value="6001011000"></area>
+        <area name="雲林" value="6001012000"></area>
+
+        <area name="嘉義" value="6001013000"></area>
+        <area name="台南" value="6001014000"></area>
+        <area name="高雄" value="6001016000"></area>
+        <area name="屏東" value="6001018000"></area>
+
+        <area name="花蓮" value="6001020000"></area>
+        <area name="台東" value="6001019000"></area>
+        <area name="金門" value="6001022000"></area>
+        <area name="連江" value="6001023000"></area>
+
+    </areas>
+    <jobCategory>
+        <layer1 name="資訊軟體系統類" value="2007000000">
+            <layer2 name="軟體／工程類人員" value="2007001000" >
+                <layer3 name="軟體專案主管" value="2007001001"></layer3>
+                <layer3 name="電子商務技術主管" value="2007001002"></layer3>
+                <layer3 name="通訊軟體工程師" value="2007001003"></layer3>
+                <layer3 name="軟體設計工程師" value="2007001004"></layer3>
+                <layer3 name="韌體設計工程師" value="2007001005"></layer3>
+                <layer3 name="Internet程式設計師" value="2007001006"></layer3>
+                <layer3 name="電腦系統分析師" value="2007001007"></layer3>
+                <layer3 name="電玩程式設計師" value="2007001008"></layer3>
+                <layer3 name="其他資訊專業人員" value="2007001009"></layer3>
+                <layer3 name="資訊助理人員" value="2007001010"></layer3>
+                <layer3 name="BIOS工程師" value="2007001011"></layer3>
+                <layer3 name="演算法開發工程師" value="2007001012"></layer3>
+            </layer2> 
+            <layer2 name="MIS程式設計師" value="2007002000" >
+                <layer3 name="MIS/網管主管" value="2007002001"></layer3>
+                <layer3 name="資料庫管理人員" value="2007002002"></layer3>
+                <layer3 name="MIS程式設計師" value="2007002003"></layer3>
+                <layer3 name="MES工程師" value="2007002004"></layer3>
+                <layer3 name="網路管理工程師" value="2007002005"></layer3>
+                <layer3 name="系統維護/操作人員" value="2007002006"></layer3>
+                <layer3 name="資訊設備管制人員" value="2007002007"></layer3>
+                <layer3 name="網路安全分析師" value="2007002008"></layer3>
+            </layer2>
+        </layer1>
+        <layer1 name="財會/金融專業類" value="2003000000">
+            <layer2 name="金融專業相關類人員"  value= "2003002000" ></layer2> 
+            <layer2 name="財務/會計/稅務類"  value= "2003001000"></layer2> 
+        </layer1> 
+    </jobCategory>
+    <industryCategory>
+        <layer1 name="金融投顧及保險業" value="1004000000">
+            <layer2 name="投資理財相關業" value="1004002000"></layer2>
+            <layer2 name="金融機構及其相關業" value="1004001000"></layer2>
+        </layer1>
+    </industryCategory>
+</config>
