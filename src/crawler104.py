@@ -38,11 +38,16 @@ class Crawler104:
 
 def URL_siever(url_list, callback_func):
     root_url = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}'
+    unpassed_url = url_list
 
-def param_siever(param_name, param_val):
+    passed_url = []
+    param_siever(passed_url, 'jobcat', '2007000000')
+
+def param_siever(passed_url, param_name, param_val = None):
     xml_path = os.path.join(settings.configDirectory,'104_config.xml')
     tree = xml_etree_ElementTree.parse(xml_path)
-    root = tree.getroot()
+    root = tree.Element(param_name)
+    print(root)
     param_node = root.find('.//*[@value="{}"]'.format(param_val))
     for child in param_node:
         print(child.attrib['value'])
@@ -54,8 +59,8 @@ if __name__ == "__main__":
     # 額外參數:     order 排序方式, asc 由低到高
     ro_dict = {"全部":"0","全職":"1","兼職":"2","高階":"3","派遣":"4","接案":"5","家教":"6" }
     order_dict = {"符合度排序":"12","日期排序":"11","學歷":"4","經歷":"3","應徵人數":"7","待遇":"13"}
-    param_siever('jobcat','2007000000')
 
+    param_siever(passed_url, 'jobcat')
     #myCrawler = Crawler104()
     #myCrawler.generate_excel("test")
     #myCrawler.parse_unparsed_excel("../data/jobs104_20190912_IT產業.xlsx")
