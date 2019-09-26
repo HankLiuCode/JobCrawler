@@ -36,24 +36,16 @@ class Crawler104:
         df.to_excel(to_filepath,index=False)
         print("finished parsing:  {} -> {}".format(from_filepath,to_filepath))
 
-def jobcat_one(root_url,jobcat_param):
-    param_queue = multiprocessing_Manager().Queue()
-    param_queue.put(jobcat_param)
+def URL_siever(url_list, callback_func):
+    root_url = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}'
 
-    while not param_queue.empty():
-        param = param_queue.get()
-        url = root_url.format(param)
-        total = myCrawler.crawlerCore.getTotal("totalCount",url)
-        print("url:{} total:{}".format(url,total))
-
-        if total > 3000:
-            param_node = root.find('.//*[@value="{}"]'.format(param))
-            for child in param_node:
-                param_queue.put(child.attrib['value'])
-
-def jobcat_url_filter(url_list):
-    for url in url_list:
-        print(re.match("\d+",url))
+def param_siever(param_name, param_val):
+    xml_path = os.path.join(settings.configDirectory,'104_config.xml')
+    tree = xml_etree_ElementTree.parse(xml_path)
+    root = tree.getroot()
+    param_node = root.find('.//*[@value="{}"]'.format(param_val))
+    for child in param_node:
+        print(child.attrib['value'])
     
 if __name__ == "__main__":
     # 參數使用範例:  參數 > 1 用 %2C 隔開
@@ -62,19 +54,9 @@ if __name__ == "__main__":
     # 額外參數:     order 排序方式, asc 由低到高
     ro_dict = {"全部":"0","全職":"1","兼職":"2","高階":"3","派遣":"4","接案":"5","家教":"6" }
     order_dict = {"符合度排序":"12","日期排序":"11","學歷":"4","經歷":"3","應徵人數":"7","待遇":"13"}
-    
-    xml_path = os.path.join(settings.configDirectory,'104_config.xml')
-    tree = xml_etree_ElementTree.parse(xml_path)
-    root = tree.getroot()
+    param_siever('jobcat','2007000000')
 
-    myCrawler = Crawler104()
-    root_url = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}'
-    jobcat_root_url = root_url + "&jobcat=2007001000"
-    urls = []
-    urls.append(jobcat_root_url)
-    jobcat_url_filter(urls)
-    
-
+    #myCrawler = Crawler104()
     #myCrawler.generate_excel("test")
     #myCrawler.parse_unparsed_excel("../data/jobs104_20190912_IT產業.xlsx")
 
