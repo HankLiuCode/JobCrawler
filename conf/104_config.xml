@@ -1,44 +1,73 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <config>
-    <areas>
-        <area name="台北" value="6001001000">
-            <district name="中正區" value="6001001001"></district>
-            <district name="大同區" value="6001001002"></district>
-            <district name="中山區" value="6001001003"></district>
-            <district name="松山區" value="6001001004"></district>
-            <district name="大安區" value="6001001005"></district>
-            <district name="萬華區" value="6001001006"></district>
-            <district name="信義區" value="6001001007"></district>
-            <district name="士林區" value="6001001008"></district>
-            <district name="北投區" value="6001001009"></district>
-            <district name="內湖區" value="6001001010"></district>
-            <district name="南港區" value="6001001011"></district>
-            <district name="文山區" value="6001001012"></district>
-        </area>
-        <area name="新北" value="6001002000"></area>
-        <area name="宜蘭" value="6001003000"></area>
-        <area name="基隆" value="6001004000"></area>
-        <area name="桃園" value="6001005000"></area>
-        <area name="新竹" value="6001006000"></area>
+    <area>
+        <layer1 name="台北" value="6001001000">
+            <layer2 name="中正區" value="6001001001"></layer2>
+            <layer2 name="大同區" value="6001001002"></layer2>
+            <layer2 name="中山區" value="6001001003"></layer2>
+            <layer2 name="松山區" value="6001001004"></layer2>
+            <layer2 name="大安區" value="6001001005"></layer2>
+            <layer2 name="萬華區" value="6001001006"></layer2>
+            <layer2 name="信義區" value="6001001007"></layer2>
+            <layer2 name="士林區" value="6001001008"></layer2>
+            <layer2 name="北投區" value="6001001009"></layer2>
+            <layer2 name="內湖區" value="6001001010"></layer2>
+            <layer2 name="南港區" value="6001001011"></layer2>
+            <layer2 name="文山區" value="6001001012"></layer2>
+        </layer1>
+        <layer1 name="新北" value="6001002000"></layer1>
+            <layer2 name="萬里區" value="6001002001"></layer2>
+            <layer2 name="金山區" value="6001002002"></layer2>
+            <layer2 name="板橋區" value="6001002003"></layer2>
+            <layer2 name="汐止區" value="6001002004"></layer2>
+            <layer2 name="深坑區" value="6001002005"></layer2>
+            <layer2 name="石碇區" value="6001002006"></layer2>
+            <layer2 name="瑞芳區" value="6001002007"></layer2>
+            <layer2 name="平溪區" value="6001002008"></layer2>
+            <layer2 name="雙溪區" value="6001002009"></layer2>
+            <layer2 name="貢寮區" value="6001002010"></layer2>
+            <layer2 name="新店區" value="6001002011"></layer2>
+            <layer2 name="坪林區" value="6001002012"></layer2>
+            <layer2 name="烏來區" value="6001002013"></layer2>
+            <layer2 name="永和區" value="6001002014"></layer2>
+            <layer2 name="中和區" value="6001002015"></layer2>
+            <layer2 name="土城區" value="6001002016"></layer2>
+            <layer2 name="三峽區" value="6001002017"></layer2>
+            <layer2 name="樹林區" value="6001002018"></layer2>
+            <layer2 name="鶯歌區" value="6001002019"></layer2>
+            <layer2 name="三重區" value="6001002020"></layer2>
+            <layer2 name="新莊區" value="6001002021"></layer2>
+            <layer2 name="泰山區" value="6001002022"></layer2>
+            <layer2 name="林口區" value="6001002023"></layer2>
+            <layer2 name="蘆洲區" value="6001002024"></layer2>
+            <layer2 name="五股區" value="6001002025"></layer2>
+            <layer2 name="八里區" value="6001002026"></layer2>
+            <layer2 name="淡水區" value="6001002027"></layer2>
+            <layer2 name="三芝區" value="6001002028"></layer2>
+            <layer2 name="石門區" value="6001002029"></layer2>
+        <layer1 name="宜蘭" value="6001003000"></layer1>
+        <layer1 name="基隆" value="6001004000"></layer1>
+        <layer1 name="桃園" value="6001005000"></layer1>
+        <layer1 name="新竹" value="6001006000"></layer1>
 
-        <area name="苗栗" value="6001007000"></area>
-        <area name="台中" value="6001008000"></area>
-        <area name="彰化" value="6001010000"></area>
-        <area name="南投" value="6001011000"></area>
-        <area name="雲林" value="6001012000"></area>
+        <layer1 name="苗栗" value="6001007000"></layer1>
+        <layer1 name="台中" value="6001008000"></layer1>
+        <layer1 name="彰化" value="6001010000"></layer1>
+        <layer1 name="南投" value="6001011000"></layer1>
+        <layer1 name="雲林" value="6001012000"></layer1>
 
-        <area name="嘉義" value="6001013000"></area>
-        <area name="台南" value="6001014000"></area>
-        <area name="高雄" value="6001016000"></area>
-        <area name="屏東" value="6001018000"></area>
+        <layer1 name="嘉義" value="6001013000"></layer1>
+        <layer1 name="台南" value="6001014000"></layer1>
+        <layer1 name="高雄" value="6001016000"></layer1>
+        <layer1 name="屏東" value="6001018000"></layer1>
 
-        <area name="花蓮" value="6001020000"></area>
-        <area name="台東" value="6001019000"></area>
-        <area name="金門" value="6001022000"></area>
-        <area name="連江" value="6001023000"></area>
+        <layer1 name="花蓮" value="6001020000"></layer1>
+        <layer1 name="台東" value="6001019000"></layer1>
+        <layer1 name="金門" value="6001022000"></layer1>
+        <layer1 name="連江" value="6001023000"></layer1>
 
-    </areas>
-    <jobCategory>
+    </area>
+    <jobcat>
         <layer1 name="資訊軟體系統類" value="2007000000">
             <layer2 name="軟體／工程類人員" value="2007001000" >
                 <layer3 name="軟體專案主管" value="2007001001"></layer3>
@@ -69,11 +98,11 @@
             <layer2 name="金融專業相關類人員"  value= "2003002000" ></layer2> 
             <layer2 name="財務/會計/稅務類"  value= "2003001000"></layer2> 
         </layer1> 
-    </jobCategory>
-    <industryCategory>
+    </jobcat>
+    <indcat>
         <layer1 name="金融投顧及保險業" value="1004000000">
             <layer2 name="投資理財相關業" value="1004002000"></layer2>
             <layer2 name="金融機構及其相關業" value="1004001000"></layer2>
         </layer1>
-    </industryCategory>
+    </indcat>
 </config>

@@ -39,53 +39,6 @@ class Crawler104:
         df.to_excel(to_filepath,index=False)
         print("finished parsing:  {} -> {}".format(from_filepath,to_filepath))
 
-def getTotal(url):
-    header_info = {
-        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
-        'Accept-Language':'zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4',
-        'Connection':'close'
-    }
-    retryRequest = requests.Session()
-    retryRequest.mount( 'https://', HTTPAdapter( max_retries = 5 ) )
-    res = retryRequest.get( url.format(1),headers=header_info, timeout=5, verify=False)
-    soup = BeautifulSoup(res.text,'html.parser')
-
-    totalCount = int( re.search( r'\"{}\":(\d*)'.format("totalCount"), soup.text).group(1))
-    totalPage = int( re.search( r'\"{}\":(\d*)'.format("totalPage"), soup.text).group(1))
-    return [totalCount,totalPage]
-
-def url_seiver(urls):
-    root_url = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}'
-    passed_urls = []
-    unpassed_urls = urls
-        
-    print(passed_urls)
-    print(unpassed_urls)
-
-def traverse_param_tree(param_list, param_name, param_val = None):
-    url = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}&jobcat='
-    for param in param_child("jobcat", param_val):
-        traverse_param_tree(param_list, param_name, param)
-    param_list.append(param_val)
-
-def param_child(param_name, param_val = None):
-    param_children_value = []
-    xml_path = os.path.join(settings.configDirectory,'104_config.xml')
-    tree = xml_etree_ElementTree.parse(xml_path)
-    parent = tree.find('{}'.format(param_name))
-    if param_val:
-        parent = parent.find('.//*[@value="{}"]'.format(param_val))
-    for child in parent:
-        param_children_value.append(child.attrib['value'])
-    return param_children_value
-
-def url_param_dict(url):
-    params = re.findall(r"[^&?]*?=[^&?]*",url)
-    param_dict = {}
-    for param in params:
-        p_name,p_val = param.split("=")
-        param_dict[p_name] = p_val.split("%2C")
-    return param_dict 
 
 
 if __name__ == "__main__":
@@ -97,9 +50,9 @@ if __name__ == "__main__":
     order_dict = {"符合度排序":"12","日期排序":"11","學歷":"4","經歷":"3","應徵人數":"7","待遇":"13"}
     root_url = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}'
     
-    param_list = []
-    traverse_param_tree(param_list,"jobcat")
-    print(param_list)
+    url_siever([root_url])
+    
+
     #myCrawler = Crawler104()
     #myCrawler.start_crawl(root_url)
     #myCrawler.generate_excel("test")

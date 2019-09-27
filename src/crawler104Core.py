@@ -129,7 +129,6 @@ class Crawler104Core:
                     joblink = job.select_one('.js-job-link')['href']
                     joblink = 'https:' + joblink
 
-
                     company = job.select_one('.b-list-inline a').text
                     company = self.__cleanText(company)
 
@@ -145,3 +144,63 @@ class Crawler104Core:
         except KeyboardInterrupt:
             return jobList
         return jobList
+
+    # 以下還在測試 為了解決104中只能爬到150頁(約3000個工作)的問題
+    # 利用 104_config.xml 中
+    def url_siever(urls):
+    jobcat_urls = sieve_urls_with_param(urls, 'jobcat')
+    area_urls = sieve_urls_with_param([url[0] for url in jobcat_urls if not url[1]], 'area')
+    
+    print(area_urls)
+
+
+    def sieve_urls_with_param(urls, sieve_with_param):
+        url_list = []
+        for url in urls:
+            param_list = []
+            param_name = sieve_with_param
+            traverse_param_tree(param_list, url, param_name)
+            for param in param_list:
+                param_url = url + "&{}=".format(param_name) + param[0]
+                url_list.append((param_url, param[1]))
+        return url_list
+
+
+    def traverse_param_tree(param_list, base_url, param_name, param_val = None):
+        url = base_url + "&{}=".format(param_name)
+        if not param_val:
+            for param in param_child(param_name):
+                traverse_param_tree(param_list, base_url, param_name, param)
+
+        elif getTotal(url+param_val)[0] < 3000:
+            param_list.append((param_val, True))
+
+        elif getTotal(url+param_val)[0] >= 3000 and len(param_child(param_name, param_val)) == 0:
+            param_list.append((param_val, False))
+
+        else:
+            for param in param_child(param_name, param_val):
+                traverse_param_tree(param_list, base_url, param_name, param)
+
+    def param_child(param_name, param_val = None):
+        param_children_value = []
+        xml_path = os.path.join(settings.configDirectory,'104_config.xml')
+        tree = xml_etree_ElementTree.parse(xml_path)
+        try:
+            parent = tree.find('{}'.format(param_name))
+            if param_val:
+                parent = parent.find('.//*[@value="{}"]'.format(param_val))
+            for child in parent:
+                param_children_value.append(child.attrib['value'])
+        except TypeError:
+            print("{} param_name {} does not exist".format(TypeError, param_name))
+            raise
+        return param_children_value
+
+    def url_param_dict(url):
+        params = re.findall(r"[^&?]*?=[^&?]*",url)
+        param_dict = {}
+        for param in params:
+            p_name,p_val = param.split("=")
+            param_dict[p_name] = p_val.split("%2C")
+        return param_dict 
