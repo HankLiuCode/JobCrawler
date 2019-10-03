@@ -15,7 +15,7 @@
             <layer2 name="南港區" value="6001001011"></layer2>
             <layer2 name="文山區" value="6001001012"></layer2>
         </layer1>
-        <layer1 name="新北" value="6001002000"></layer1>
+        <layer1 name="新北" value="6001002000">
             <layer2 name="萬里區" value="6001002001"></layer2>
             <layer2 name="金山區" value="6001002002"></layer2>
             <layer2 name="板橋區" value="6001002003"></layer2>
@@ -45,6 +45,7 @@
             <layer2 name="淡水區" value="6001002027"></layer2>
             <layer2 name="三芝區" value="6001002028"></layer2>
             <layer2 name="石門區" value="6001002029"></layer2>
+        </layer1>
         <layer1 name="宜蘭" value="6001003000"></layer1>
         <layer1 name="基隆" value="6001004000"></layer1>
         <layer1 name="桃園" value="6001005000"></layer1>
