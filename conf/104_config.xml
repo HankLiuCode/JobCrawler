@@ -13,8 +13,7 @@
             <layer2 name="北投區" value="6001001009"></layer2>
             <layer2 name="內湖區" value="6001001010"></layer2>
             <layer2 name="南港區" value="6001001011"></layer2>
-            <layer2 name="文山區" value="6001001012"></layer2>
-        </layer1>
+            <layer2 name="文山區" value="6001001012"></layer2></layer1>
         <layer1 name="新北" value="6001002000">
             <layer2 name="萬里區" value="6001002001"></layer2>
             <layer2 name="金山區" value="6001002002"></layer2>
@@ -44,8 +43,7 @@
             <layer2 name="八里區" value="6001002026"></layer2>
             <layer2 name="淡水區" value="6001002027"></layer2>
             <layer2 name="三芝區" value="6001002028"></layer2>
-            <layer2 name="石門區" value="6001002029"></layer2>
-        </layer1>
+            <layer2 name="石門區" value="6001002029"></layer2></layer1>
         <layer1 name="宜蘭" value="6001003000"></layer1>
         <layer1 name="基隆" value="6001004000"></layer1>
         <layer1 name="桃園" value="6001005000"></layer1>
@@ -69,6 +67,14 @@
 
     </area>
     <jobcat>
+        <layer1 name="經營/人資類" value="2001000000"></layer1>
+        <layer1 name="行政/總務/法務類" value="2002000000"></layer1>
+        <layer1 name="財會/金融專業類" value="2003000000">
+            <layer2 name="金融專業相關類人員"  value= "2003002000" ></layer2> 
+            <layer2 name="財務/會計/稅務類"  value= "2003001000"></layer2></layer1> 
+        <layer1 name="行銷/企劃/專案管理類" value="2004000000"></layer1>
+        <layer1 name="客服/門市/業務/貿易類" value="2005000000"></layer1>
+        <layer1 name="餐飲/旅遊/美容美髮類" value="2006000000"></layer1>
         <layer1 name="資訊軟體系統類" value="2007000000">
             <layer2 name="軟體／工程類人員" value="2007001000" >
                 <layer3 name="軟體專案主管" value="2007001001"></layer3>
@@ -82,8 +88,7 @@
                 <layer3 name="其他資訊專業人員" value="2007001009"></layer3>
                 <layer3 name="資訊助理人員" value="2007001010"></layer3>
                 <layer3 name="BIOS工程師" value="2007001011"></layer3>
-                <layer3 name="演算法開發工程師" value="2007001012"></layer3>
-            </layer2> 
+                <layer3 name="演算法開發工程師" value="2007001012"></layer3></layer2> 
             <layer2 name="MIS程式設計師" value="2007002000" >
                 <layer3 name="MIS/網管主管" value="2007002001"></layer3>
                 <layer3 name="資料庫管理人員" value="2007002002"></layer3>
@@ -92,18 +97,25 @@
                 <layer3 name="網路管理工程師" value="2007002005"></layer3>
                 <layer3 name="系統維護/操作人員" value="2007002006"></layer3>
                 <layer3 name="資訊設備管制人員" value="2007002007"></layer3>
-                <layer3 name="網路安全分析師" value="2007002008"></layer3>
-            </layer2>
-        </layer1>
-        <layer1 name="財會/金融專業類" value="2003000000">
-            <layer2 name="金融專業相關類人員"  value= "2003002000" ></layer2> 
-            <layer2 name="財務/會計/稅務類"  value= "2003001000"></layer2> 
-        </layer1> 
+                <layer3 name="網路安全分析師" value="2007002008"></layer3></layer2></layer1>
+        <layer1 name="研發相關類" value="2008000000"></layer1>
+        <layer1 name="生產製造/品管/環衛類" value="2009000000"></layer1>
+        <layer1 name="操作/技術/維修類" value="2010000000"></layer1>
+        <layer1 name="資材/物流/運輸類" value="2011000000"></layer1>
+        <layer1 name="營建/製圖類" value="2012000000"></layer1>
+        <layer1 name="傳播藝術/設計類" value="2013000000"></layer1>
+        <layer1 name="文字/傳媒工作類" value="2014000000"></layer1>
+        <layer1 name="醫療/保健服務類" value="2015000000"></layer1>
+        <layer1 name="學術/教育/輔導類" value="2016000000"></layer1>
+        <layer1 name="軍警消/保全類" value="2017000000">
+            <layer2 name="軍警消防類人員" value="2017001000"></layer2>
+            <layer2 name="保全類人員" value="2017002000"></layer2></layer1>
+        <layer1 name="其他職類" value="2018000000"></layer1>
     </jobcat>
     <indcat>
         <layer1 name="金融投顧及保險業" value="1004000000">
             <layer2 name="投資理財相關業" value="1004002000"></layer2>
-            <layer2 name="金融機構及其相關業" value="1004001000"></layer2>
-        </layer1>
+            <layer2 name="金融機構及其相關業" value="1004001000"></layer2></layer1>
+        <layer1 name="大眾傳播相關業" value="1006000000"></layer1>
     </indcat>
 </config>
