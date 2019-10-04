@@ -5,12 +5,12 @@ import pandas
 from datetime import datetime
 import os
 
-def filename_with_header(self, name):
-    filename = "jobs104_"+ str(datetime.datetime.now().date()).replace("-","")+"_" + name
+def filenameWithHeader(name):
+    filename = "jobs104_"+ str(datetime.now().date()).replace("-","")+"_" + name
     filename = os.path.join(settings.dataDirectory,filename)
     return filename
 
-def parse_unparsed_excel(self,from_filepath,sheet="Sheet1"):
+def parseExcel(from_filepath,sheet="Sheet1"):
     parser104 = Parser104(configPath,appliedNumberSheet,workingAreaSheet)
     df = pandas.read_excel(io=from_filepath,sheet_name=sheet)
     df = parser104.parse104Dataframe(df)
@@ -30,7 +30,15 @@ if __name__ == "__main__":
     ro_dict = {"全部":"0","全職":"1","兼職":"2","高階":"3","派遣":"4","接案":"5","家教":"6" }
     order_dict = {"符合度排序":"12","日期排序":"11","學歷":"4","經歷":"3","應徵人數":"7","待遇":"13"}
     root_url = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}'
+    
+    url1 = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}&indcat=1004002000'
+    url2 = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}&jobcat=2007002000'
+    url3= 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}&jobcat=2017000000'
+    urls = [url3]
+    
+    crawlerCore = Crawler104Core()
+    crawlerCore.startCrawl(urls)
+    df = pandas.DataFrame(crawlerCore.getResult())
 
-    name = "whatever.xlsx"
-    filename = "jobs104_"+ str(datetime.combine(datetime().date(),datetime().timetz())).replace("-","")+"_" + name
-    print(filename)
+    filename = filenameWithHeader("test.xlsx")
+    df.to_excel(filename)

@@ -8,8 +8,6 @@ import settings
 import os
 from xml.etree import ElementTree as xml_etree_ElementTree
 
-import pandas
-
 class Crawler104Core:
     def __init__(self):
         self.header_info = {
@@ -63,8 +61,8 @@ class Crawler104Core:
             print("ERROR: getTotal()")
         return {'totalCount':totalCount,'totalPage':totalPage}
 
-    def start_crawl(self,urls):
-        url_infos = self.url_siever(urls)
+    def startCrawl(self,urls):
+        url_infos = self.urlSiever(urls)
         totalJobs = 0
         urls = []
         for url_info in url_infos:
@@ -73,10 +71,10 @@ class Crawler104Core:
         self.totalJobs = totalJobs
 
         for url in urls:
-            url_jobs = self.crawl_url(url)
+            url_jobs = self.crawlUrl(url)
             self.processedJob += url_jobs
 
-    def crawl_url(self, root_url):
+    def crawlUrl(self, root_url):
         totalCount, totalPage = self.getTotal(root_url)['totalCount'],self.getTotal(root_url)['totalPage']
         currentPage = 1
         currentCount = 1
@@ -107,7 +105,7 @@ class Crawler104Core:
                         moreJobDetail = {'工作名稱':jobname, '公司':company, '工作連結':joblink}
                         jobDetail.update(moreJobDetail)
                         jobList.append(jobDetail)
-                    print( '[{}/{}|{}/{}] {}'.format(currentCount,totalCount, len(self.processedJob), self.totalJobs, joblink))
+                    print( '[{}/{}] {}/{}] {}'.format(currentCount,totalCount, len(self.processedJob), self.totalJobs, joblink))
                     currentCount += 1
                 currentPage += 1
         except KeyboardInterrupt:
@@ -178,7 +176,7 @@ class Crawler104Core:
         #print(jobDetailDict)
         return jobDetailDict
 
-    def url_siever(self,urls):
+    def urlSiever(self,urls):
         url_infos = []
         for url in urls:
             totalCount = self.getTotal(url)['totalCount']
@@ -187,9 +185,9 @@ class Crawler104Core:
                 is_passed = False
             url_infos.append((url, totalCount, is_passed))
         
-        url_infos = self.sieve_url_with_param(url_infos, 'jobcat')
+        url_infos = self.sieveUrlWithParam(url_infos, 'jobcat')
         url_infos = [url_info for url_info in url_infos if not url_info[1] == 0 ]
-        url_infos = self.sieve_url_with_param(url_infos, 'area')
+        url_infos = self.sieveUrlWithParam(url_infos, 'area')
         url_infos = [url_info for url_info in url_infos if not url_info[1] == 0]
         
         passed = []
@@ -206,7 +204,7 @@ class Crawler104Core:
 
         return url_infos
 
-    def sieve_url_with_param(self, url_infos, param_name):
+    def sieveUrlWithParam(self, url_infos, param_name):
         #url_infos sieved with parameter param_name
         url_info_list = []
 
@@ -219,9 +217,9 @@ class Crawler104Core:
             else:
                 if param_name in url:
                     param_val = re.search(r'&{}=(\d+)'.format(param_name),url).group(1)
-                    self.traverse_param_tree(param_list, baseurl, param_name, param_val)
+                    self.traverseParamTree(param_list, baseurl, param_name, param_val)
                 else:
-                    self.traverse_param_tree(param_list, url, param_name)
+                    self.traverseParamTree(param_list, url, param_name)
 
                 for param in param_list:
                     param_url = baseurl + "&{}=".format(param_name) + param[0]
@@ -229,24 +227,24 @@ class Crawler104Core:
         
         return url_info_list
 
-    def traverse_param_tree(self,param_list, base_url, param_name, param_val = None):
+    def traverseParamTree(self,param_list, base_url, param_name, param_val = None):
         url = base_url + "&{}=".format(param_name)
         if not param_val:
-            for param in self.param_child(param_name):
-                self.traverse_param_tree(param_list, base_url, param_name, param)
+            for param in self.paramChild(param_name):
+                self.traverseParamTree(param_list, base_url, param_name, param)
         else:
             totalCount = self.getTotal(url + param_val)['totalCount']
             if totalCount <= 3000:
                 param_list.append((param_val, totalCount, True))
 
-            elif totalCount > 3000 and len(self.param_child(param_name, param_val)) == 0:
+            elif totalCount > 3000 and len(self.paramChild(param_name, param_val)) == 0:
                 param_list.append((param_val, totalCount, False))
 
             else:
-                for param in self.param_child(param_name, param_val):
-                    self.traverse_param_tree(param_list, base_url, param_name, param)
+                for param in self.paramChild(param_name, param_val):
+                    self.traverseParamTree(param_list, base_url, param_name, param)
 
-    def param_child(self,param_name, param_val = None):
+    def paramChild(self,param_name, param_val = None):
         param_children_value = []
         xml_path = os.path.join(settings.configDirectory,'104_config.xml')
         tree = xml_etree_ElementTree.parse(xml_path)
@@ -263,30 +261,7 @@ class Crawler104Core:
 
         
 
-if __name__ == "__main__":
-    url1 = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}&indcat=1004002000'
-    url2 = 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}&jobcat=2007002000'
-    url3= 'https://www.104.com.tw/jobs/search/?jobsource=2018indexpoc&page={}&jobcat=2017000000'
-    urls = [url3]
-    cc = Crawler104Core()
-    cc.start_crawl(urls)
-    df = pandas.DataFrame(cc.getResult())
-    df.to_excel('test.xlsx')
-
-    #traverse_param_tree tests
-    """
-    param_list = []
-    cc.traverse_param_tree(param_list, url3, 'jobcat', '2017000000')
-    print(param_list)
-    """
-    #sieve_url_with_param tests
-    """
-    for url in urls:
-        url_infos = [(url, cc.getTotal(url)['totalCount'], False)]
-        url_info_list = cc.sieve_url_with_param(url_infos,'jobcat')
-        print(url_info_list)
-        print(len(url_info_list))
-    """
+    
 
     
     
