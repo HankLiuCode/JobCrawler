@@ -12,17 +12,59 @@ header_info = {
         }
 url = 'https://www.1111.com.tw/job-bank/job-index.asp?si=1&d0=140200&fs=1&ps=100&page={}'
 
-alljobs = []
-currentPage = 1
-totalPage = 10
-while currentPage < totalPage:
-    res = requests.get(url.format(currentPage), headers = header_info,verify = sslVerify)
-    soup = BeautifulSoup(res.text, 'html.parser')
-    jobs = soup.select('.digest')
-    for job in jobs:
-        jobname = job.select_one('.mobiFullLInk')['title']
-        joblink = job.select_one('.mobiFullLInk')['href']
-        alljobs.append({'jobname':jobname,'joblink':joblink})
-    currentPage += 1
-print(alljobs)
-print(len(alljobs))
+def __getElementsText(self,elements):
+    seperate_char = "、"
+    result = ''
+    for element in elements :
+        text = element.text.strip()
+        if text != '':
+            if result != '':
+                result +=seperate_char
+            result += text
+    return result
+
+def __cleanText(self,text):
+    #replace blank lines
+    text = text.strip().replace('\n','').replace('\t','').replace('\r','')
+    #replace unwanted chars
+    text = text.replace('：','')
+    return text
+
+def getTotalPage(url):
+    res = requests.get(url.format(1), headers = header_info,verify = sslVerify)
+    totalPage = re.search(r'<span class="on">\d+</span>\s*/\s*(\d+)',res.text).group(1)
+    return int(totalPage)
+
+def crawlUrl(url):
+    alljobs = []
+    currentPage = 1
+    totalPage = getTotalPage(url)
+    while currentPage < totalPage:
+        res = requests.get(url.format(currentPage), headers = header_info,verify = sslVerify)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        jobs = soup.select('.digest')
+        for job in jobs:
+            jobname = job.select_one('.mobiFullLInk')['title']
+            joblink = job.select_one('.mobiFullLInk')['href']
+            jobDetailDict = getJobDetail(joblink)
+
+            alljobs.append({'jobname':jobname,'joblink':joblink})
+        currentPage += 1
+        print("[{}/{}]".format(currentPage,totalPage))
+    print(alljobs)
+    print(len(alljobs))
+
+def getJobDetail(url):
+    jobno = re.search(r'job/(\d+)/',url).group(1)
+    if jobno:
+        getJobDetailStandard(jobno)
+    print(jobno)
+
+def getJobDetailStandard(jobno):
+    joburl = 'https://www.1111.com.tw/job/{}'.format(jobno)
+    res = requests.get(joburl,headers = header_info,verify = sslVerify)
+    soup = BeautifulSoup(res.text,'html.parser')
+    print(soup)
+
+joburl = 'https://www.1111.com.tw/job/91153661/'
+getJobDetail(joburl)
