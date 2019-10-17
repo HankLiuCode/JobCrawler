@@ -1,0 +1,28 @@
+from bs4 import BeautifulSoup
+import re
+import requests
+from requests.adapters import HTTPAdapter
+import time
+
+sslVerify = False
+header_info = {
+            'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
+            'Accept-Language':'zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4',
+            'Connection':'close'
+        }
+url = 'https://www.1111.com.tw/job-bank/job-index.asp?si=1&d0=140200&fs=1&ps=100&page={}'
+
+alljobs = []
+currentPage = 1
+totalPage = 10
+while currentPage < totalPage:
+    res = requests.get(url.format(currentPage), headers = header_info,verify = sslVerify)
+    soup = BeautifulSoup(res.text, 'html.parser')
+    jobs = soup.select('.digest')
+    for job in jobs:
+        jobname = job.select_one('.mobiFullLInk')['title']
+        joblink = job.select_one('.mobiFullLInk')['href']
+        alljobs.append({'jobname':jobname,'joblink':joblink})
+    currentPage += 1
+print(alljobs)
+print(len(alljobs))
